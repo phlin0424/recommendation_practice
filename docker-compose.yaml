@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  pipeline:
+    build:
+      context: .
+      dockerfile: DockerfilePipeline  # Name of your Dockerfile for the pipeline service
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts 
+      - ./mlflow:/app/mlflow/
+      - ./ml-1m:/app/ml-1m # Data folder
+    environment:
+      GIT_PYTHON_REFRESH: quiet 
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+
+
+  ftp-server:
+    image: stilliard/pure-ftpd:latest
+    container_name: ftp-server
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - $PWD/ftp/data:/home/ftpusers
+    environment:
+      - PUBLICHOST=localhost
+      - FTP_USER_NAME=ftpuser
+      - FTP_USER_PASS=ftppass
+      - FTP_USER_HOME=/home/ftpusers
+    restart: always
+
+
+  mlflow-server:
+    build:
+      context: .
+      dockerfile: DockerfileMlflow
+    expose:
+      - "5001"
+    ports:
+      - "5001:5000"
+    environment:
+      GIT_PYTHON_REFRESH: quiet # suppress the warning 
+    command: mlflow server --backend-store-uri sqlite:///work/mlflow/mlflow.db --default-artifact-root ftp://ftpuser:ftppass@ftp-server/ --host 0.0.0.0 --port 5000
+    restart: always
+    volumes:
+      - ./mlflow:/work/mlflow # Mount the SQLite database
+
+  db:
+    image: ankane/pgvector
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pgvector_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+volumes:
+  pgdata:

@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+WORKDIR  /app
+RUN mkdir /app/data
+RUN mkdir /app/data/m1-1m
+RUN mkdir /app/utils
+
+# Install poetry
+RUN pip install poetry
+
+# Copy poetry realted files
+COPY pyproject.toml poetry.lock /app/
+
+# Copy the pipline scripts
+COPY pipeline.py /app/
+COPY pipeline_module.py /app/utils/
+COPY ml_1m_data.py /app/
+
+# Install gcc and other necessary build tools
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    python3-dev \
+    libpython3-dev
+
+# Install the dependencies usnig poetry
+RUN poetry config virtualenvs.in-project true
+RUN poetry install
+
+
+# Launch the ML pipeline
+CMD ["poetry", "run", "python", "pipeline.py"]
+
