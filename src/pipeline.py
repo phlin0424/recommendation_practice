@@ -1,52 +1,43 @@
 import logging
-import os
-
 import joblib
 from utils.pipeline_module import evaluation_model, preprocess, train_model
 
 import mlflow
+from core.config import settings
 
 # Settings of logging output
 logging.basicConfig(
     level=logging.INFO,
-    format="[%(asctime)s][%(name)s][%(levelname)s][%(message)s]",
+    format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# TODO: integrate to core.config
-tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5001")
-experiment_name = "recommendation_system_2"
+# Logging the experiment details
+logger.info(f"MLFLOW_TRACKING_URI: {settings.tracking_uri}")
+logger.info(f"ARTIFACT_ROOT: {settings.artifact_location}")
+logger.info(f"experiment_id: {settings.experiment_id}")
+
+# Load the tracking uri and the experiment name
+tracking_uri = settings.tracking_uri
+experiment_name = settings.experiment_name
 
 # Set the tracking URI to the local MLflow server
 mlflow.set_tracking_uri(tracking_uri)
-experiment = mlflow.get_experiment_by_name(experiment_name)
-if experiment is None:
-    experiment_id = mlflow.create_experiment(
-        name=experiment_name,
-    )
-else:
-    experiment_id = experiment.experiment_id
 
-
-# Get the experiment details for logging
-experiment = mlflow.get_experiment(experiment_id)
-artifact_location = experiment.artifact_location
-tracking_uri = mlflow.get_tracking_uri()
-
-# Logging the experiment details
-logger.info(f"MLFLOW_TRACKING_URI: {tracking_uri}")
-logger.info(f"ARTIFACT_ROOT: {artifact_location}")
-logger.info(f"experiment_id: {experiment_id}")
+# Set up the experiment
+# experiment = mlflow.get_experiment_by_name(experiment_name)
 
 
 # ================================================
 #  Pipeline
 # ================================================
 
-with mlflow.start_run(experiment_id=experiment_id) as run:
+with mlflow.start_run(experiment_id=settings.experiment_id) as run:
     # Preprocess
-    trainset, testset = preprocess()
-    mlflow.log_param("test_size", 0.25)
+    test_size = 0.25
+    trainset, testset = preprocess(test_size)
+    mlflow.log_param("test_size", test_size)
+    mlflow.log_param("model_name", "svd")
 
     # model training
     algo = train_model(trainset)

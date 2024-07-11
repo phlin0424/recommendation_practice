@@ -21,11 +21,17 @@ class Settings(BaseSettings):
     backend_store_uri: str
 
     @property
+    def artifact_location(self) -> str:
+        return f"ftp://{self.ftp_user_name}:{self.ftp_user_pass}@ftp-server/"
+
+    @property
     def tracking_uri(self) -> str:
         return f"http://{self.mlflow_tracking_host}:{self.mlflow_tracking_port}"
 
     @property
     def experiment_id(self) -> int:
+        mlflow.set_tracking_uri(self.tracking_uri)
+        # Ensure that the specified experiment name exist
         experiment = mlflow.get_experiment_by_name(self.experiment_name)
         return experiment.experiment_id
 
@@ -38,7 +44,7 @@ class Settings(BaseSettings):
 # Load all the environment variables
 settings = Settings()
 
-# http://mlflow-server:5000
 
 if __name__ == "__main__":
+    # suppose to be http://mlflow-server:5000
     print(settings.tracking_uri)

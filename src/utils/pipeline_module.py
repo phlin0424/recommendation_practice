@@ -12,7 +12,7 @@ async def get_data_from_db():
     return ratings.data
 
 
-def preprocess():
+def preprocess(test_size):
     # Load the training data from db
     ratings = asyncio.run(get_data_from_db())
 
@@ -26,7 +26,7 @@ def preprocess():
     data = Dataset.load_from_df(ratings_df[["user_id", "item_id", "rating"]], reader)
 
     # Split the dataset into train and test sets
-    trainset, testset = train_test_split(data, test_size=0.25)
+    trainset, testset = train_test_split(data, test_size=test_size)
 
     return trainset, testset
 
