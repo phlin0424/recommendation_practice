@@ -1,21 +1,24 @@
 import asyncio
-import os
 
 import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from table_models.settings import Ratings
+from core.config import settings
 
-# TODO: integrate to core.config
-DB_HOST = os.getenv("DB_HOST", "localhost")
-
+DB_HOST = settings.db_host
+POSTGRES_DB = settings.postgres_db
+POSTGRES_PASSWORD = settings.postgres_password
+POSTGRES_USER = settings.postgres_user
 
 # Define the database URL
-DATABASE_URL = f"postgresql+asyncpg://postgres:postgres@{DB_HOST}/pgvector_db"
+DATABASE_URL = (
+    f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}/pgvector_db"
+)
 
 # Create an async engine and session
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -45,6 +48,6 @@ if __name__ == "__main__":
             }
             for rating in ratings
         ]
-        print(pd.DataFrame(ratings_data))
+        print(pd.DataFrame(ratings_data).head(5))
 
     asyncio.run(main())

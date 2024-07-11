@@ -19,9 +19,6 @@ class Settings(BaseSettings):
     postgres_db: str
     experiment_name: str
     backend_store_uri: str
-    postgres_user: str
-    postgres_password: str
-    postgres_db: str
 
     @property
     def tracking_uri(self) -> str:
