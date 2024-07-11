@@ -1,9 +1,7 @@
 FROM python:3.11-slim
 
 WORKDIR  /app
-RUN mkdir /app/data
-RUN mkdir /app/data/m1-1m
-RUN mkdir /app/utils
+RUN mkdir /app/src
 
 # Install poetry
 RUN pip install poetry
@@ -12,9 +10,7 @@ RUN pip install poetry
 COPY pyproject.toml poetry.lock /app/
 
 # Copy the pipline scripts
-COPY pipeline.py /app/
-COPY pipeline_module.py /app/utils/
-COPY ml_1m_data.py /app/
+COPY src /app/src
 
 # Install gcc and other necessary build tools
 RUN apt-get update && apt-get install -y \
@@ -29,5 +25,5 @@ RUN poetry install
 
 
 # Launch the ML pipeline
-CMD ["poetry", "run", "python", "pipeline.py"]
+CMD ["poetry", "run", "python", "src/pipeline.py"]
 

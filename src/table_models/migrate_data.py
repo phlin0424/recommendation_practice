@@ -17,7 +17,8 @@ Base.metadata.create_all(engine)
 
 
 # Path to load the data
-data_dir = Path(__file__).resolve().parent.parent / "data" / "ml-1m"
+# TODO: integrate to core.config
+data_dir = Path(__file__).resolve().parent.parent.parent / "data" / "ml-1m"
 
 
 users = pd.read_csv(
@@ -51,10 +52,31 @@ ratings = pd.read_csv(
 ratings["timestamp"] = pd.to_datetime(ratings["timestamp"], unit="s")
 
 
+def migrate_to_ml_1m():
+    # Insert the data into the database
+    users.to_sql(
+        "users",
+        engine,
+        if_exists="append",
+        index=False,
+        schema=SCHEMA_NAME,
+    )
+    movies.to_sql(
+        "movies",
+        engine,
+        if_exists="append",
+        index=False,
+        schema=SCHEMA_NAME,
+    )
+    ratings.to_sql(
+        "ratings",
+        engine,
+        if_exists="append",
+        index=False,
+        schema=SCHEMA_NAME,
+    )
+
+
 if __name__ == "__main__":
     # Insert the data into the database
-    users.to_sql("users", engine, if_exists="append", index=False, schema=SCHEMA_NAME)
-    movies.to_sql("movies", engine, if_exists="append", index=False, schema=SCHEMA_NAME)
-    ratings.to_sql(
-        "ratings", engine, if_exists="append", index=False, schema=SCHEMA_NAME
-    )
+    migrate_to_ml_1m()

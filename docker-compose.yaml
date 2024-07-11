@@ -8,10 +8,10 @@ services:
     volumes:
       - ./mlflow/artifacts:/app/mlflow/artifacts 
       - ./mlflow:/app/mlflow/
-      - ./ml-1m:/app/ml-1m # Data folder
     environment:
       GIT_PYTHON_REFRESH: quiet 
       MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      DB_HOST: db
 
 
   ftp-server:

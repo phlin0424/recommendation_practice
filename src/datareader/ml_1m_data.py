@@ -1,12 +1,15 @@
 from pydantic import BaseModel
 from pathlib import Path
+from datareader.db import fetch_ratings
+from datetime import datetime
+import asyncio
 
 
 class Rating(BaseModel):
     user_id: int
     item_id: int
     rating: int
-    timestamp: int
+    timestamp: datetime
 
 
 class Ratings(BaseModel):
@@ -33,6 +36,26 @@ class Ratings(BaseModel):
             )
         return cls(data=read_data)
 
+    @classmethod
+    async def from_db(cls) -> "Ratings":
+        ratings = await fetch_ratings()
+        read_data = [
+            Rating(
+                user_id=rating.user_id,
+                item_id=rating.item_id,
+                rating=rating.rating,
+                timestamp=rating.timestamp,
+            )
+            for rating in ratings
+        ]
+        return cls(data=read_data)
+
 
 if __name__ == "__main__":
-    print(Ratings.from_csv().data[0:10])
+    # print(Ratings.from_csv().data[0:10])
+    async def _main():
+        # caution: this will produce tons of output
+        ratings = await Ratings.from_db()
+        print(ratings.data)
+
+    asyncio.run(_main())

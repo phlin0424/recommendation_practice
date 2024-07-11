@@ -3,7 +3,12 @@ name = "recommendation-practice"
 version = "0.1.0"
 description = ""
 authors = ["PH <phlin@example.com>"]
-packages = [{include = "datareader"},{include = "utils"}, {include = "table_models"}]
+packages = [
+    {include = "datareader", from = "src"},
+    {include = "utils", from = "src"}, 
+    {include = "table_models", from = "src"},
+    {include = "core", from = "src"}
+]
 
 
 [tool.poetry.dependencies]
@@ -17,6 +22,9 @@ pydantic = "^2.8.2"
 joblib = "^1.4.2"
 pgvector = "^0.3.0"
 psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+greenlet = "^3.0.3"
+pydantic-settings = "^2.3.4"
 
 [build-system]
 requires = ["poetry-core"]
