@@ -6,4 +6,4 @@ data
 ftp
 mlflow
 mlruns
-test_dummy
+.test_dummy

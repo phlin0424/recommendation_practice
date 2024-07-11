@@ -26,6 +26,18 @@ asyncpg = "^0.29.0"
 greenlet = "^3.0.3"
 pydantic-settings = "^2.3.4"
 
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.27.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poe.tasks]
+test = "pytest tests/"
+lint = "poetry run ruff check src tests --fix"
+format = "poetry run ruff format src tests"
+isort = "poetry run ruff check src tests --select I --fix-only"
+db = "docker-compose exec db psql -U postgres -d anki_db"
+x = ["lint", "format", "isort"]
