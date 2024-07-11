@@ -7,3 +7,4 @@ ftp
 mlflow
 mlruns
 .test_dummy
+.ruff_cache

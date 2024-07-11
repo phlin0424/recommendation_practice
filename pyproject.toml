@@ -42,5 +42,5 @@ test = "pytest tests/"
 lint = "poetry run ruff check src tests --fix"
 format = "poetry run ruff format src tests"
 isort = "poetry run ruff check src tests --select I --fix-only"
-db = "docker-compose exec db psql -U postgres -d anki_db"
+db = "docker-compose exec db psql -U postgres -d pgvector_db"
 x = ["lint", "format", "isort"]
