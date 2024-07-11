@@ -1,10 +1,11 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-import pandas as pd
-from sqlalchemy import select
-from table_models.settings import Ratings
 import asyncio
 import os
+
+import pandas as pd
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from table_models.settings import Ratings
 
 # TODO: integrate to core.config
 DB_HOST = os.getenv("DB_HOST", "localhost")

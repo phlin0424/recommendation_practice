@@ -1,9 +1,9 @@
-from surprise import Dataset, Reader
-from surprise.model_selection import train_test_split
-from surprise import SVD, accuracy
-from datareader.ml_1m_data import Ratings
-import pandas as pd
 import asyncio
+
+import pandas as pd
+from datareader.ml_1m_data import Ratings
+from surprise import SVD, Dataset, Reader, accuracy
+from surprise.model_selection import train_test_split
 
 
 async def get_data_from_db():

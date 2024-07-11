@@ -1,8 +1,10 @@
-import mlflow
-import joblib
 import logging
-from utils.pipeline_module import preprocess, train_model, evaluation_model
 import os
+
+import joblib
+from utils.pipeline_module import evaluation_model, preprocess, train_model
+
+import mlflow
 
 # Settings of logging output
 logging.basicConfig(

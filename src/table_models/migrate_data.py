@@ -1,8 +1,9 @@
-import pandas as pd
-from table_models.settings import SCHEMA_NAME, Base
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from pathlib import Path
+
+import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from table_models.settings import SCHEMA_NAME, Base
 
 # Database connection string
 DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost/pgvector_db"

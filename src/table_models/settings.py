@@ -1,12 +1,12 @@
-from sqlalchemy.orm import declarative_base
 from sqlalchemy import (
     Column,
-    Integer,
-    String,
     DateTime,
     ForeignKey,
+    Integer,
     PrimaryKeyConstraint,
+    String,
 )
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 

@@ -1,8 +1,9 @@
-from pydantic import BaseModel
-from pathlib import Path
-from datareader.db import fetch_ratings
-from datetime import datetime
 import asyncio
+from datetime import datetime
+from pathlib import Path
+
+from datareader.db import fetch_ratings
+from pydantic import BaseModel
 
 
 class Rating(BaseModel):
