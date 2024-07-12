@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from table_models.settings import SCHEMA_NAME, Base
+from table_models.ml_1m.settings import SCHEMA_NAME, Base
 
 # Database connection string
 DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost/pgvector_db"
@@ -19,7 +19,7 @@ Base.metadata.create_all(engine)
 
 # Path to load the data
 # TODO: integrate to core.config
-data_dir = Path(__file__).resolve().parent.parent.parent / "data" / "ml-1m"
+data_dir = Path(__file__).resolve().parent.parent.parent.parent / "data" / "ml-1m"
 
 
 users = pd.read_csv(
