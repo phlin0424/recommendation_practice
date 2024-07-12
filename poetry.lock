@@ -1521,8 +1521,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
     {version = ">=1.23.2", markers = "python_version == \"3.11\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -1595,12 +1595,12 @@ ptyprocess = ">=0.5"
 
 [[package]]
 name = "pgvector"
-version = "0.3.0"
+version = "0.3.1"
 description = "pgvector support for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pgvector-0.3.0-py2.py3-none-any.whl", hash = "sha256:2fab31f62927ac807a7b398274ca03ccc0bab675989be7258ded3131a525c7b0"},
+    {file = "pgvector-0.3.1-py2.py3-none-any.whl", hash = "sha256:7da0629915083a9769b9a73481efb4cdc9122cfd35fc7a9248ce43d177a9c8e8"},
 ]
 
 [package.dependencies]
@@ -1980,8 +1980,8 @@ files = [
 annotated-types = ">=0.4.0"
 pydantic-core = "2.20.1"
 typing-extensions = [
-    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
     {version = ">=4.6.1", markers = "python_version < \"3.13\""},
+    {version = ">=4.12.2", markers = "python_version >= \"3.13\""},
 ]
 
 [package.extras]
@@ -2889,4 +2889,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "7b338c427d79c0e75db55522601dbcfafc1834a6e2384e567cb1703859e89777"
+content-hash = "40645f95b4f08758b399b06098975bc3ae90a5eae5af89972576ae0b790a939f"
