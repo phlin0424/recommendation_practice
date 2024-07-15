@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from table_models.settings import Ratings
+from table_models.ml_1m.settings import Ratings
 from core.config import settings
 
 DB_HOST = settings.db_host
