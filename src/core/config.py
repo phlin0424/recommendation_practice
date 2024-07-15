@@ -10,10 +10,10 @@ class Settings(BaseSettings):
     mlflow_tracking_host: str
     mlflow_tracking_port: int
     db_host: str
-    publichost: str
     ftp_user_name: str
     ftp_user_pass: str
     ftp_user_home: str
+    ftp_host: str
     postgres_user: str
     postgres_password: str
     postgres_db: str
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     @property
     def artifact_location(self) -> str:
-        return f"ftp://{self.ftp_user_name}:{self.ftp_user_pass}@ftp-server/"
+        return f"ftp://{self.ftp_user_name}:{self.ftp_user_pass}@{self.ftp_host}/"
 
     @property
     def tracking_uri(self) -> str:
