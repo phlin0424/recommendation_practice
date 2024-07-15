@@ -44,7 +44,8 @@ class Settings(BaseSettings):
 # Load all the environment variables
 settings = Settings()
 
-
 if __name__ == "__main__":
-    # suppose to be http://mlflow-server:5000
-    print(settings.tracking_uri)
+    print(f"Loading .env file from: {DIR_PATH } /  .env")
+    print(f"Tracking URI: {settings.tracking_uri}")
+    print(f"DB Host: {settings.db_host}")
+    print(settings.model_dump())  # Print all loaded settings

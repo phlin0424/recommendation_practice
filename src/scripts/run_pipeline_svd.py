@@ -3,7 +3,7 @@ import joblib
 from pipelines.pipeline_svd.preprocess import preprocess
 from pipelines.pipeline_svd.train import train_model
 from pipelines.pipeline_svd.evaluate import evaluation_model
-
+from core.config import DIR_PATH
 
 import mlflow
 from core.config import settings
@@ -47,7 +47,7 @@ with mlflow.start_run(experiment_id=settings.experiment_id) as run:
     algo = train_model(trainset)
 
     # Save the model locally
-    model_filename = "mlflow/artifacts/svd_model.pkl"
+    model_filename = DIR_PATH / "mlflow/artifacts/svd_model.pkl"
     joblib.dump(algo, model_filename)
     print(f"Model saved to {model_filename}")
     mlflow.log_artifact(model_filename, artifact_path="models")
