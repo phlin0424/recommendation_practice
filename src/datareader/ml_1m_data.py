@@ -1,9 +1,10 @@
 import asyncio
 from datetime import datetime
 from pathlib import Path
+
+from datareader.db import fetch_datas
 from pydantic import BaseModel
 from table_models.ml_1m.settings import Ratings as Ratings_model
-from datareader.db import fetch_datas
 
 
 class Rating(BaseModel):

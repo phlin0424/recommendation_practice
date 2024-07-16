@@ -1,8 +1,7 @@
+from core.config import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
-from core.config import settings
 
 DB_HOST = "localhost"
 # DB_HOST = settings.db_host

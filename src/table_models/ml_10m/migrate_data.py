@@ -1,12 +1,10 @@
+import logging
 from pathlib import Path
 
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from table_models.ml_10m.settings import SCHEMA_NAME, Base
-import logging
-from alembic import op
-import sqlalchemy as sa
 
 # Set up log
 logging.basicConfig(

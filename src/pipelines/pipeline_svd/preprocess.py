@@ -1,6 +1,7 @@
-from datareader.ml_1m_data import Ratings
 import asyncio
+
 import pandas as pd
+from datareader.ml_1m_data import Ratings
 from surprise import Dataset, Reader
 from surprise.model_selection import train_test_split
 

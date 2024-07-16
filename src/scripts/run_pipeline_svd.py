@@ -1,12 +1,12 @@
 import logging
+
 import joblib
+from core.config import DIR_PATH, settings
+from pipelines.pipeline_svd.evaluate import evaluation_model
 from pipelines.pipeline_svd.preprocess import preprocess
 from pipelines.pipeline_svd.train import train_model
-from pipelines.pipeline_svd.evaluate import evaluation_model
-from core.config import DIR_PATH
 
 import mlflow
-from core.config import settings
 
 # Settings of logging output
 logging.basicConfig(
