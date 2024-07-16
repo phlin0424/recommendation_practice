@@ -1,13 +1,11 @@
-import asyncio
-
-import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from table_models.ml_1m.settings import Ratings
+
 from core.config import settings
 
-DB_HOST = settings.db_host
+DB_HOST = "localhost"
+# DB_HOST = settings.db_host
 POSTGRES_DB = settings.postgres_db
 POSTGRES_PASSWORD = settings.postgres_password
 POSTGRES_USER = settings.postgres_user
@@ -27,27 +25,16 @@ AsyncSessionLocal = sessionmaker(
 
 
 # Async function to fetch data from the database
-async def fetch_ratings():
+async def fetch_datas(table_model):
+    """Async function to select data from DB
+
+    Args:
+        table_model (_type_): The target table to apply select.
+
+    Returns:
+        _type_: _description_
+    """
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(Ratings))
+        result = await session.execute(select(table_model))
         ratings = result.scalars().all()
         return ratings
-
-
-if __name__ == "__main__":
-    # test that if we can fetch the data from db using async process:
-    async def main():
-        ratings = await fetch_ratings()
-
-        ratings_data = [
-            {
-                "user_id": rating.user_id,
-                "item_id": rating.item_id,
-                "rating": rating.rating,
-                "timestamp": rating.timestamp,
-            }
-            for rating in ratings
-        ]
-        print(pd.DataFrame(ratings_data).head(5))
-
-    asyncio.run(main())

@@ -1,9 +1,9 @@
 import asyncio
 from datetime import datetime
 from pathlib import Path
-
-from datareader.db import fetch_ratings
 from pydantic import BaseModel
+from table_models.ml_1m.settings import Ratings as Ratings_model
+from datareader.db import fetch_datas
 
 
 class Rating(BaseModel):
@@ -39,7 +39,7 @@ class Ratings(BaseModel):
 
     @classmethod
     async def from_db(cls) -> "Ratings":
-        ratings = await fetch_ratings()
+        ratings = await fetch_datas(Ratings_model)
         read_data = [
             Rating(
                 user_id=rating.user_id,
@@ -53,10 +53,28 @@ class Ratings(BaseModel):
 
 
 if __name__ == "__main__":
-    # print(Ratings.from_csv().data[0:10])
+    # test that if we can fetch the data from db using async process:
+    # import pandas as pd
+
+    # async def main():
+    #     ratings = await fetch_datas(Ratings_model)
+
+    #     ratings_data = [
+    #         {
+    #             "user_id": rating.user_id,
+    #             "item_id": rating.item_id,
+    #             "rating": rating.rating,
+    #             "timestamp": rating.timestamp,
+    #         }
+    #         for rating in ratings
+    #     ]
+    #     print(pd.DataFrame(ratings_data).head(5))
+
+    # asyncio.run(main())
+
     async def _main():
         # caution: this will produce tons of output
         ratings = await Ratings.from_db()
-        print(ratings.data)
+        print(ratings.data[0:10])
 
     asyncio.run(_main())
