@@ -2,7 +2,6 @@ from datetime import datetime
 from datareader.db import fetch_datas, get_tables
 from pydantic import BaseModel
 from datareader.ml_data_base import AbstractDatas
-from table_models.ml_10m.settings import Ratings as Ratings_model
 from table_models.ml_10m.settings import Movies as Movies_model
 from table_models.ml_10m.settings import Tags as Tags_model
 from core.config import settings
@@ -44,8 +43,12 @@ class Ratings(AbstractDatas):
     data: list[Rating]
 
     @classmethod
-    async def from_db(cls) -> "Ratings":
-        ratings = await fetch_datas(Ratings_model)
+    async def from_db(cls, user_num=1000) -> "Ratings":
+        with open(settings.sql_dir / "ratings.sql", "r") as f:
+            sql_query = f.read()
+
+        args = {"user_num": user_num}
+        ratings = await get_tables(sql_query=sql_query, args=args)
         read_data = [
             Rating(
                 user_id=rating.user_id,
@@ -125,14 +128,14 @@ if __name__ == "__main__":
     import asyncio
     import time
 
-    # async def _main():
-    #     ratings = await Ratings.from_db()
-    #     train_data, test_data = ratings.split_data()
-    #     print(test_data[0])
-    #     print(test_data[1])
-    #     print(len(ratings.data))
-    #     print(len(test_data))
-    #     print(len(train_data))
+    async def _main():
+        ratings = await Ratings.from_db()
+        train_data, test_data = ratings.split_data()
+        print(test_data[0])
+        print(test_data[1])
+        print(len(ratings.data))
+        print(len(test_data))
+        print(len(train_data))
 
     # async def _main():
     #     movies = await Movies.from_db()
@@ -145,16 +148,16 @@ if __name__ == "__main__":
     #     print(len(test_data))
     #     print(len(train_data))
 
-    async def _main():
-        movies = await IntegratedDatas.from_db()
-        train_data, test_data = movies.split_data()
-        print(movies.data[0])
+    # async def _main():
+    #     movies = await IntegratedDatas.from_db()
+    #     train_data, test_data = movies.split_data()
+    #     print(movies.data[0])
 
-        print(test_data[0])
-        print(test_data[1])
-        print("length of all data: ", len(movies.data))
-        print(len(test_data))
-        print(len(train_data))
+    #     print(test_data[0])
+    #     print(test_data[1])
+    #     print("length of all data: ", len(movies.data))
+    #     print(len(test_data))
+    #     print(len(train_data))
 
     print("loading movie lense data")
     start_time = time.time()
