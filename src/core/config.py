@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     postgres_db: str
     experiment_name: str
     backend_store_uri: str
+    src_dir: Path = DIR_PATH / "src"
+    sql_dir: Path = DIR_PATH / "src" / "sql"
 
     @property
     def artifact_location(self) -> str:
