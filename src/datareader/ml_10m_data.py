@@ -1,10 +1,11 @@
 from datetime import datetime
-from datareader.db import fetch_datas
+from datareader.db import fetch_datas, get_tables
 from pydantic import BaseModel
 from datareader.ml_data_base import AbstractDatas
 from table_models.ml_10m.settings import Ratings as Ratings_model
 from table_models.ml_10m.settings import Movies as Movies_model
 from table_models.ml_10m.settings import Tags as Tags_model
+from core.config import settings
 
 
 class Rating(BaseModel):
@@ -25,6 +26,17 @@ class Tag(BaseModel):
     user_id: int
     movie_id: int
     tag: str
+    timestamp: datetime
+
+
+class IntegratedData(BaseModel):
+    user_id: int
+    movie_id: int
+    rating: int
+    movie_title: str
+    movie_year: int
+    genres: list[str]
+    tags: list[str]
     timestamp: datetime
 
 
@@ -83,6 +95,32 @@ class Tags(AbstractDatas):
         return cls(data=read_data)
 
 
+class IntegratedDatas(AbstractDatas):
+    data: list[IntegratedData]
+
+    @classmethod
+    async def from_db(cls, user_num=1000) -> "IntegratedData":
+        with open(settings.sql_dir / "integrated_tables.sql", "r") as f:
+            sql_query = f.read()
+
+        args = {"user_num": user_num}
+        integrated_datas = await get_tables(sql_query=sql_query, args=args)
+        read_data = [
+            IntegratedData(
+                user_id=row.user_id,
+                movie_id=row.movie_id,
+                rating=row.rating,
+                movie_title=row.movie_title,
+                movie_year=row.movie_year,
+                genres=row.genres.split("|"),
+                tags=row.tags.lower().split("|"),
+                timestamp=row.timestamp,
+            )
+            for row in integrated_datas
+        ]
+        return cls(data=read_data)
+
+
 if __name__ == "__main__":
     import asyncio
     import time
@@ -96,8 +134,19 @@ if __name__ == "__main__":
     #     print(len(test_data))
     #     print(len(train_data))
 
+    # async def _main():
+    #     movies = await Movies.from_db()
+    #     train_data, test_data = movies.split_data()
+    #     print(movies.data[0])
+
+    #     print(test_data[0])
+    #     print(test_data[1])
+    #     print("length of all data: ", len(movies.data))
+    #     print(len(test_data))
+    #     print(len(train_data))
+
     async def _main():
-        movies = await Movies.from_db()
+        movies = await IntegratedDatas.from_db()
         train_data, test_data = movies.split_data()
         print(movies.data[0])
 
@@ -107,7 +156,7 @@ if __name__ == "__main__":
         print(len(test_data))
         print(len(train_data))
 
-    print("loading movies data")
+    print("loading movie lense data")
     start_time = time.time()
     asyncio.run(_main())
     end_time = time.time()
