@@ -3,9 +3,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
+import os
 
-DB_HOST = "localhost"
-# DB_HOST = settings.db_host
+if os.getenv("ENV") == "local":
+    DB_HOST = "localhost"
+else:
+    DB_HOST = settings.db_host
+
 POSTGRES_DB = settings.postgres_db
 POSTGRES_PASSWORD = settings.postgres_password
 POSTGRES_USER = settings.postgres_user
