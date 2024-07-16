@@ -9,3 +9,4 @@ mlruns
 .test_dummy
 .ruff_cache
 local_test*
+.pytest
