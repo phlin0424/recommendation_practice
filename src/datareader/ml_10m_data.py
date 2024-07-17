@@ -5,6 +5,13 @@ from datareader.ml_data_base import AbstractDatas
 from table_models.ml_10m.settings import Movies as Movies_model
 from table_models.ml_10m.settings import Tags as Tags_model
 from core.config import settings
+from enum import Enum
+
+
+# Define the Enum for the label
+class Label(str, Enum):
+    train = "train"
+    test = "test"
 
 
 class Rating(BaseModel):
@@ -12,6 +19,7 @@ class Rating(BaseModel):
     movie_id: int
     rating: int
     timestamp: datetime
+    label: Label
 
 
 class Movie(BaseModel):
@@ -37,6 +45,7 @@ class IntegratedData(BaseModel):
     genres: list[str]
     tags: list[str]
     timestamp: datetime
+    label: Label
 
 
 class Ratings(AbstractDatas):
@@ -55,6 +64,7 @@ class Ratings(AbstractDatas):
                 movie_id=rating.movie_id,
                 rating=rating.rating,
                 timestamp=rating.timestamp,
+                label=rating.label,
             )
             for rating in ratings
         ]
@@ -118,6 +128,7 @@ class IntegratedDatas(AbstractDatas):
                 genres=row.genres.split("|"),
                 tags=row.tags.lower().split("|"),
                 timestamp=row.timestamp,
+                label=row.label,
             )
             for row in integrated_datas
         ]
@@ -128,14 +139,14 @@ if __name__ == "__main__":
     import asyncio
     import time
 
-    async def _main():
-        ratings = await Ratings.from_db()
-        train_data, test_data = ratings.split_data()
-        print(test_data[0])
-        print(test_data[1])
-        print(len(ratings.data))
-        print(len(test_data))
-        print(len(train_data))
+    # async def _main():
+    #     ratings = await Ratings.from_db()
+    #     train_data, test_data = ratings.split_data()
+    #     print(test_data[0])
+    #     print(test_data[1])
+    #     print(len(ratings.data))
+    #     print(len(test_data))
+    #     print(len(train_data))
 
     # async def _main():
     #     movies = await Movies.from_db()
@@ -148,16 +159,15 @@ if __name__ == "__main__":
     #     print(len(test_data))
     #     print(len(train_data))
 
-    # async def _main():
-    #     movies = await IntegratedDatas.from_db()
-    #     train_data, test_data = movies.split_data()
-    #     print(movies.data[0])
-
-    #     print(test_data[0])
-    #     print(test_data[1])
-    #     print("length of all data: ", len(movies.data))
-    #     print(len(test_data))
-    #     print(len(train_data))
+    async def _main():
+        movies = await IntegratedDatas.from_db()
+        print(movies.data[0])
+        train_data, test_data = movies.split_data()
+        print(test_data[0])
+        print(test_data[1])
+        print("length of all data: ", len(movies.data))
+        print(len(test_data))
+        print(len(train_data))
 
     print("loading movie lense data")
     start_time = time.time()

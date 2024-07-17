@@ -1,4 +1,3 @@
-from sklearn.model_selection import train_test_split
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import TypeVar
@@ -22,11 +21,15 @@ class AbstractDatas(ABC, BaseModel):
 
     def split_data(
         self: T,
-        test_size: float = 0.25,
-        random_state: int = 42,
     ) -> tuple[list, list]:
         """Split the data into testing data and training data."""
-        train_data, test_data = train_test_split(
-            self.data, test_size=test_size, random_state=random_state
-        )
+        # Divide the data into train and test groups
+        train_data = []
+        test_data = []
+
+        for item in self.data:
+            if item.label == "train":
+                train_data.append(item)
+            else:
+                test_data.append(item)
         return train_data, test_data

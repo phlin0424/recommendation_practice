@@ -60,7 +60,8 @@ movies_with_tags AS (
         tags_of_movie
     ON 
         movies.movie_id = tags_of_movie.movie_id
-)
+), 
+all_data as (
 SELECT 
     user_id, 
     ratings.movie_id, 
@@ -75,4 +76,36 @@ FROM
 INNER JOIN
     movies_with_tags
 ON 
-    ratings.movie_id = movies_with_tags.movie_id; 
+    ratings.movie_id = movies_with_tags.movie_id
+),
+ranked_data AS (
+    SELECT 
+        user_id, 
+        movie_id, 
+        rating, 
+        movie_title, 
+        movie_year, 
+        genres, 
+        tags, 
+        timestamp, 
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) AS rank
+    FROM 
+        all_data
+)
+SELECT
+    user_id,
+    movie_id,
+    rating,
+    movie_title, 
+    movie_year, 
+    genres, 
+    tags, 
+    timestamp,
+    CASE
+        WHEN rank <= 5 THEN 'train'
+        ELSE 'test'
+    END AS label
+FROM
+    ranked_data
+ORDER BY 
+    user_id, timestamp; 
