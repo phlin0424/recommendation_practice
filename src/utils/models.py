@@ -192,6 +192,24 @@ class RandomRecommender(BaseRecommender):
         return metrics
 
 
+class PopularityRecommender:
+    def __init__(
+        self, train_data: list[IntegratedData], test_data: list[IntegratedData]
+    ):
+        self.train_data = train_data
+        self.test_data = test_data
+        self.pred_matrix = None
+
+    def train():
+        pass
+
+    def predict():
+        pass
+
+    def evaluate():
+        pass
+
+
 if __name__ == "__main__":
     from pipelines.pipeline_random.preprocess import preprocess
 

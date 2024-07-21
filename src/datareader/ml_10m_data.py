@@ -43,7 +43,6 @@ class IntegratedData(BaseModel):
     movie_title: str
     movie_year: int
     genres: list[str]
-    tags: list[str]
     timestamp: datetime
     label: Label
 
@@ -112,7 +111,7 @@ class IntegratedDatas(AbstractDatas):
     data: list[IntegratedData]
 
     @classmethod
-    async def from_db(cls, user_num=1000) -> "IntegratedData":
+    async def from_db(cls, user_num=1000) -> "IntegratedDatas":
         with open(settings.sql_dir / "integrated_tables.sql", "r") as f:
             sql_query = f.read()
 
@@ -126,7 +125,6 @@ class IntegratedDatas(AbstractDatas):
                 movie_title=row.movie_title,
                 movie_year=row.movie_year,
                 genres=row.genres.split("|"),
-                tags=row.tags.lower().split("|"),
                 timestamp=row.timestamp,
                 label=row.label,
             )
@@ -166,8 +164,8 @@ if __name__ == "__main__":
         print(test_data[0])
         print(test_data[1])
         print("length of all data: ", len(movies.data))
-        print(len(test_data))
-        print(len(train_data))
+        print("length of test data: ", len(test_data))
+        print("length of train data: ", len(train_data))
 
     print("loading movie lense data")
     start_time = time.time()
