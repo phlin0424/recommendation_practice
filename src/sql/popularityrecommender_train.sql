@@ -101,3 +101,10 @@ filtered_movie_rating as (
 )
 
 select  * from filtered_movie_rating; 
+
+
+-- 1	1	5536
+-- 2	2	11202
+-- 3	3	34217
+-- 4	4	47597
+-- 5	5	29082
