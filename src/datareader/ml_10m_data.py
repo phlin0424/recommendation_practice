@@ -47,18 +47,18 @@ class IntegratedData(BaseModel):
     label: Label
 
 
-class PopularityTrainData(BaseModel):
+class PopularityAveRating(BaseModel):
     movie_id: int
     title: str
     ave_rating: float
     rated_movies_count: int
 
 
-class PopularityTestData(BaseModel):
-    user_id: int
-    movie_id: int
-    title: str
-    rating: int
+# class PopularityData(BaseModel):
+#     user_id: int
+#     movie_id: int
+#     title: str
+#     rating: int
 
 
 class Ratings(AbstractDatas):
@@ -147,20 +147,20 @@ class IntegratedDatas(AbstractDatas):
         return cls(data=read_data)
 
 
-class PopularityDatas(BaseModel):
-    train_data: list[PopularityTrainData]
-    test_data: list[PopularityTestData]
+class PopularityDatas(AbstractDatas):
+    data: list[IntegratedData]
+    ave_ratings: list[PopularityAveRating]
 
     @classmethod
     async def from_db(cls, user_num=1000, threshold=50) -> "PopularityDatas":
-        # Read the training data
+        # Read the averaging rating data
         with open(settings.sql_dir / "popularityrecommender_train.sql", "r") as f:
             sql_query = f.read()
 
         args = {"user_num": user_num, "threshold": threshold}
         popularity_train_datas = await get_tables(sql_query=sql_query, args=args)
-        read_train_data = [
-            PopularityTrainData(
+        ave_ratings = [
+            PopularityAveRating(
                 movie_id=row.movie_id,
                 title=row.title,
                 ave_rating=row.ave_rating,
@@ -169,26 +169,27 @@ class PopularityDatas(BaseModel):
             for row in popularity_train_datas
         ]
 
-        # Read the test data
-        with open(settings.sql_dir / "popularityrecommender_test.sql", "r") as f:
+        # Read the main data
+        with open(settings.sql_dir / "integrated_tables.sql", "r") as f:
             sql_query = f.read()
 
         args = {"user_num": user_num}
-        popularity_test_datas = await get_tables(sql_query=sql_query, args=args)
-        read_test_data = [
-            PopularityTestData(
+        integrated_datas = await get_tables(sql_query=sql_query, args=args)
+        read_data = [
+            IntegratedData(
                 user_id=row.user_id,
                 movie_id=row.movie_id,
-                title=row.title,
                 rating=row.rating,
+                movie_title=row.movie_title,
+                movie_year=row.movie_year,
+                genres=row.genres.split("|"),
+                timestamp=row.timestamp,
+                label=row.label,
             )
-            for row in popularity_test_datas
+            for row in integrated_datas
         ]
 
-        return cls(train_data=read_train_data, test_data=read_test_data)
-
-    def split_data(self):
-        return (self.train_data, self.test_data)
+        return cls(data=read_data, ave_ratings=ave_ratings)
 
 
 if __name__ == "__main__":
@@ -233,6 +234,7 @@ if __name__ == "__main__":
         # print("length of all data: ", len(movies.data))
         print("length of test data: ", len(test_data))
         print("length of train data: ", len(train_data))
+        print("length of ave ratings: ", len(movies.ave_ratings))
 
     print("loading movie lense data")
     start_time = time.time()
