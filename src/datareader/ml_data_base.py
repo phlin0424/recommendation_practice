@@ -34,6 +34,10 @@ class AbstractDatas(ABC, BaseModel):
         """Should be placed with CRUD functions, reading DB data into BaseModel data"""
         pass
 
+    @classmethod
+    def from_input(cls, input_data: list[BaseData]):
+        return cls(data=input_data)
+
     def split_data(
         self: T,
     ) -> tuple[list[BaseData], list[BaseData]]:
