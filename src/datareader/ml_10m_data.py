@@ -133,10 +133,6 @@ class IntegratedDatas(AbstractDatas):
         ]
         return cls(data=read_data)
 
-    @classmethod
-    def from_input(cls, input_data: list[IntegratedData]):
-        return cls(data=input_data)
-
 
 class PopularityDatas(AbstractDatas):
     """Data model for random Popularity recommender model"""
