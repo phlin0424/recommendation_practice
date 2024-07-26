@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import TypeVar
-
+from datetime import datetime
+from enum import Enum
 # +++++++++++++++++++++++++++++++++++++++++++++++++
 # common data loader module, using CRUD
 # can be applied in every schemas and table schema
@@ -10,8 +11,22 @@ from typing import TypeVar
 T = TypeVar("T", bound="AbstractDatas")
 
 
+class Label(str, Enum):
+    train = "train"
+    test = "test"
+
+
+class BaseData(BaseModel):
+    user_id: int
+    movie_id: int
+    rating: int
+    movie_title: str
+    timestamp: datetime
+    label: Label
+
+
 class AbstractDatas(ABC, BaseModel):
-    data: list
+    data: list[BaseData]
 
     @classmethod
     @abstractmethod
@@ -21,7 +36,7 @@ class AbstractDatas(ABC, BaseModel):
 
     def split_data(
         self: T,
-    ) -> tuple[list, list]:
+    ) -> tuple[list[BaseData], list[BaseData]]:
         """Split the data into testing data and training data."""
         # Divide the data into train and test groups
         train_data = []

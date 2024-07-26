@@ -1,17 +1,10 @@
 from datetime import datetime
 from datareader.db import fetch_datas, get_tables
 from pydantic import BaseModel
-from datareader.ml_data_base import AbstractDatas
+from datareader.ml_data_base import AbstractDatas, BaseData, Label
 from table_models.ml_10m.settings import Movies as Movies_model
 from table_models.ml_10m.settings import Tags as Tags_model
 from core.config import settings
-from enum import Enum
-
-
-# Define the Enum for the label
-class Label(str, Enum):
-    train = "train"
-    test = "test"
 
 
 class Rating(BaseModel):
@@ -34,31 +27,6 @@ class Tag(BaseModel):
     movie_id: int
     tag: str
     timestamp: datetime
-
-
-class IntegratedData(BaseModel):
-    user_id: int
-    movie_id: int
-    rating: int
-    movie_title: str
-    movie_year: int
-    genres: list[str]
-    timestamp: datetime
-    label: Label
-
-
-class PopularityAveRating(BaseModel):
-    movie_id: int
-    title: str
-    ave_rating: float
-    rated_movies_count: int
-
-
-# class PopularityData(BaseModel):
-#     user_id: int
-#     movie_id: int
-#     title: str
-#     rating: int
 
 
 class Ratings(AbstractDatas):
@@ -121,7 +89,26 @@ class Tags(AbstractDatas):
         return cls(data=read_data)
 
 
+# ==========================================
+#   Data model for ML model input
+# ==========================================
+
+
+class IntegratedData(BaseData):
+    movie_year: int
+    genres: list[str]
+
+
+class PopularityAveRating(BaseModel):
+    movie_id: int
+    title: str
+    ave_rating: float
+    rated_movies_count: int
+
+
 class IntegratedDatas(AbstractDatas):
+    """Data model for random recommender model"""
+
     data: list[IntegratedData]
 
     @classmethod
@@ -146,8 +133,14 @@ class IntegratedDatas(AbstractDatas):
         ]
         return cls(data=read_data)
 
+    @classmethod
+    def from_input(cls, input_data: list[IntegratedData]):
+        return cls(data=input_data)
+
 
 class PopularityDatas(AbstractDatas):
+    """Data model for random Popularity recommender model"""
+
     data: list[IntegratedData]
     ave_ratings: list[PopularityAveRating]
 
