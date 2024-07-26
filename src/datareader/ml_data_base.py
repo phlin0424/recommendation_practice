@@ -35,8 +35,8 @@ class AbstractDatas(ABC, BaseModel):
         pass
 
     @classmethod
-    def from_input(cls, input_data: list[BaseData]):
-        return cls(data=input_data)
+    def from_input(cls, **kwargs):
+        return cls(**kwargs)
 
     def split_data(
         self: T,
