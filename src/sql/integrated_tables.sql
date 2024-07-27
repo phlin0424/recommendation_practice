@@ -80,8 +80,8 @@ SELECT
     genres, 
     timestamp,
     CASE
-        WHEN rank <= 5 THEN 'train'
-        ELSE 'test'
+        WHEN rank <= 5 THEN 'test'
+        ELSE 'train'
     END AS label
 FROM
     ranked_data
