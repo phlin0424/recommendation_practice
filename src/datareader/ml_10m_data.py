@@ -141,7 +141,7 @@ class PopularityDatas(AbstractDatas):
     ave_ratings: list[PopularityAveRating]
 
     @classmethod
-    async def from_db(cls, user_num=1000, threshold=50) -> "PopularityDatas":
+    async def from_db(cls, user_num=1000, threshold=1) -> "PopularityDatas":
         # Read the averaging rating data
         with open(settings.sql_dir / "popularityrecommender_train.sql", "r") as f:
             sql_query = f.read()
