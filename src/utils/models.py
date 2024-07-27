@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 from datareader.ml_data_base import AbstractDatas
-from datareader.ml_10m_data import IntegratedDatas, PopularityDatas, BaseData
+from datareader.ml_10m_data import (
+    IntegratedDatas,
+    PopularityDatas,
+    BaseData,
+    IntegratedData,
+    PopularityAveRating,
+)
 import numpy as np
 from utils.evaluation_metrics import Metrics
 from collections import defaultdict
@@ -207,88 +213,71 @@ class RandomRecommender(BaseRecommender):
 class PopularityRecommender(BaseRecommender):
     def __init__(self, popularity_data: PopularityDatas):
         # Load the necessary data from the input model base
+        # Load the average rating of all the movies
         self.ave_ratings = popularity_data.ave_ratings
-        self.all_data = popularity_data.data
 
-        # Split the data
-        train_data, test_data = popularity_data.split_data()
-        self.train_data = train_data
-        self.test_data = test_data
-
-        self.__true_ratings = self.get_true_ratings(test_data)
-        self.__true_user2items = self.get_true_user2items(test_data)
+        super().__init__(input_data=popularity_data)
 
     def train(self):
         pass
 
-    @property
-    def true_ratings(self):
-        return self.__true_ratings
+    @staticmethod
+    def _predict_user2items(
+        test_data: list[IntegratedData],
+        ave_ratings: list[PopularityAveRating],
+        threshold: int = 10,
+    ) -> dict[int, list[float]]:
+        # Drive the sorted movie_id list, which is sorted by rating
+        movie_ids_sorted_by_ave = [
+            item.movie_id for item in ave_ratings if item.rated_movies_count > threshold
+        ]
 
-    @property
-    def pred_ratings(self):
-        return self.__pred_ratings
+        # Get the user_id list
+        unique_user_ids = sorted(set([row.user_id for row in test_data]))
 
-    @property
-    def true_user2items(self):
-        return self.__true_user2items
+        # Get the watched list for each user
+        user_watched_movies = defaultdict(list)
+        for row in test_data:
+            user_watched_movies[row.user_id].append(row.movie_id)
 
-    @property
-    def pred_user2items(self):
-        return self.__pred_user2items
-
-    def predict(self):
-        ave_ratings = self.ave_ratings
-        test_data = self.test_data
-
-        # Drive the sorted movie ranking list
-        # ranking from the most liked to the less
-        sorted_movie_ids = [item.movie_id for item in ave_ratings]
-
-        # Initialize a defaultdict to store lists of movie_ids for each user
-        user_movies = defaultdict(list)
-
-        # Iterate through the test_data and populate the defaultdict
-        for row in self.test_data:
-            user_movies[row.user_id].append(row.movie_id)
-
-        # Prediction-1: predict the items
-        # Iterate the movie_id over all the user-movie-id list (rated)
-        # if the movie_id hasn't been rated by the user yet, append it based on the
-        # training result (which is, the move popularity ranking)
+        # Predict the recommended movies:
         pred_user2items = defaultdict(list)
-        for user_id in user_movies.keys():
-            for movie_id in sorted_movie_ids:
-                if movie_id not in user_movies[user_id]:
+        for user_id in unique_user_ids:
+            for movie_id in movie_ids_sorted_by_ave:
+                if movie_id not in user_watched_movies[user_id]:
                     pred_user2items[user_id].append(movie_id)
                 if len(pred_user2items[user_id]) == 10:
                     break
+        return pred_user2items
 
-        # Prediction-2: predicted ratings of each movie from every user
-        # The movies which is not included in the test data
-        # Predict the ratings using random method
-        # Create a lookup dictionary for ave_ratings by movie_id
+    @staticmethod
+    def _predict_ratings(
+        test_data: list[IntegratedData], ave_ratings: list[PopularityAveRating]
+    ) -> list[float]:
         movie_id_to_ave_rating = {
             item.movie_id: item.ave_rating for item in ave_ratings
         }
-
-        predict_ratings = []
-        true_ratings = []
+        pred_ratings = []
         for row in test_data:
-            # If the specified movie_id-user_id pair doesn't exist, fill in 0.
-            predict_rating = movie_id_to_ave_rating.get(row.movie_id, 0)
+            pred_ratings.append(movie_id_to_ave_rating.get(row.movie_id, 0))
+        return pred_ratings
 
-            # Collect the predicted & true ratings
-            predict_ratings.append(predict_rating)
-            true_ratings.append(row.rating)
+    def predict(self, threshold: int = 10):
+        logging.info("PopularityRecommender: Predicting...")
+        ave_ratings = self.ave_ratings
+        test_data = self.test_data
+
+        # Prediction-1: predict item recommendations for a specific user
+        pred_user2items = self._predict_user2items(test_data, ave_ratings, threshold)
+
+        # Prediction-2: predicted all the ratings
+        predict_ratings = self._predict_ratings(test_data, ave_ratings)
 
         # Save the results
-        self.__true_ratings = true_ratings
-        self.__pred_ratings = predict_ratings
-        self.__pred_user2items = pred_user2items
+        self._pred_ratings = predict_ratings
+        self._pred_user2items = pred_user2items
 
     def evaluate(self) -> Metrics:
-        self._get_true_user2items()
         logging.info("PopularityRecommender: Calculating metrics")
         metrics = Metrics.from_ml_10m_data(
             true_ratings=self.true_ratings,
@@ -302,39 +291,31 @@ class PopularityRecommender(BaseRecommender):
 if __name__ == "__main__":
     import asyncio
 
-    async def _read_data():
-        movies = await IntegratedDatas.from_db()
-        return movies
+    # input_data = asyncio.run(IntegratedDatas.from_db())
+    # recommender = RandomRecommender(input_data)
+    # recommender.train()
+    # recommender.predict()
+    # metrics = recommender.evaluate()
+    # logging.info(
+    #     f"""
+    #     model: RandomRecommender
+    #     rmse: {metrics.rmse},
+    #     recall_at_k: {metrics.recall_at_k},
+    #     precision_at_k:{metrics.precision_at_k}
+    #     """
+    # )
+    # # rmse: 1.866140822115631,
+    # # recall_at_k: 0.001639344262295082,
+    # # precision_at_k:0.00032786885245901645
 
-    input_data = asyncio.run(_read_data())
-    recommender = RandomRecommender(input_data)
-
+    input_data = asyncio.run(PopularityDatas.from_db())
+    recommender = PopularityRecommender(input_data)
     recommender.train()
-    recommender.predict()
+    recommender.predict(threshold=100)
     metrics = recommender.evaluate()
-
-    test_user_id = 8
-
-    logging.info(f"test_user_id: {test_user_id}")
-    print(
-        np.sort(recommender.true_user2items[test_user_id]),
-        len(recommender.true_user2items[test_user_id]),
-    )
-
-    print(
-        recommender.pred_user2items[test_user_id],
-        len(recommender.pred_user2items[test_user_id]),
-    )
-
-    correct_recommendation = len(
-        set(recommender.true_user2items[test_user_id])
-        & set(recommender.pred_user2items[test_user_id])
-    )
-    logging.info(f"correct recommendation: {correct_recommendation}")
-
-    # 1.9092755485816106 0.0063848062833906346 0.04536842105263157
     logging.info(
         f"""
+        model: PopularityRecommender
         rmse: {metrics.rmse},
         recall_at_k: {metrics.recall_at_k},
         precision_at_k:{metrics.precision_at_k}
