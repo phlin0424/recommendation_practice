@@ -221,10 +221,18 @@ class PopularityRecommender(BaseRecommender):
     def train(self):
         pass
 
+    def _get_watched_list(self) -> dict[int, list[int]]:
+        # Get the watched list for each user
+        user_watched_movies = defaultdict(list)
+        for row in self.train_data:
+            user_watched_movies[row.user_id].append(row.movie_id)
+        self.user_watched_movies = user_watched_movies
+
     @staticmethod
     def _predict_user2items(
         test_data: list[IntegratedData],
         ave_ratings: list[PopularityAveRating],
+        user_watched_movies: dict[int, list[int]],
         threshold: int = 10,
     ) -> dict[int, list[float]]:
         # Drive the sorted movie_id list, which is sorted by rating
@@ -233,12 +241,7 @@ class PopularityRecommender(BaseRecommender):
         ]
 
         # Get the user_id list
-        unique_user_ids = sorted(set([row.user_id for row in test_data]))
-
-        # Get the watched list for each user
-        user_watched_movies = defaultdict(list)
-        for row in test_data:
-            user_watched_movies[row.user_id].append(row.movie_id)
+        unique_user_ids = sorted(set([row.user_id for row in test_data]), reverse=True)
 
         # Predict the recommended movies:
         pred_user2items = defaultdict(list)
@@ -268,7 +271,10 @@ class PopularityRecommender(BaseRecommender):
         test_data = self.test_data
 
         # Prediction-1: predict item recommendations for a specific user
-        pred_user2items = self._predict_user2items(test_data, ave_ratings, threshold)
+        self._get_watched_list()
+        pred_user2items = self._predict_user2items(
+            test_data, ave_ratings, self.user_watched_movies, threshold
+        )
 
         # Prediction-2: predicted all the ratings
         predict_ratings = self._predict_ratings(test_data, ave_ratings)
@@ -309,10 +315,14 @@ if __name__ == "__main__":
     # # precision_at_k:0.00032786885245901645
 
     input_data = asyncio.run(PopularityDatas.from_db())
+    print(input_data.ave_ratings[0:10])
     recommender = PopularityRecommender(input_data)
     recommender.train()
     recommender.predict(threshold=100)
     metrics = recommender.evaluate()
+
+    print(recommender.pred_user2items[8])
+
     logging.info(
         f"""
         model: PopularityRecommender
