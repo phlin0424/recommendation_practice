@@ -67,7 +67,7 @@ ranked_data AS (
         movie_year, 
         genres, 
         timestamp, 
-        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) AS rank
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp desc) AS rank
     FROM 
         all_data
 ), split_data as (

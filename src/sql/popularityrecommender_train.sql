@@ -36,7 +36,7 @@ split_ratings as (
             movie_id, 
             rating,
             timestamp,  
-            ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp) AS rank
+            ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp desc) AS rank
         from 
             filterd_ratings_by_user_num
     ) as ranked
