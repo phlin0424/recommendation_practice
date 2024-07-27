@@ -2,9 +2,9 @@ import logging
 
 import joblib
 from core.config import DIR_PATH, settings
-from pipelines.pipeline_svd.evaluate import evaluation_model
-from pipelines.pipeline_svd.preprocess import preprocess
-from pipelines.pipeline_svd.train import train_model
+from pipelines.pipeline_svd import evaluation_model
+from pipelines.pipeline_svd import preprocess
+from pipelines.pipeline_svd import train_model
 
 import mlflow
 
@@ -37,11 +37,11 @@ mlflow.set_tracking_uri(tracking_uri)
 
 with mlflow.start_run(experiment_id=settings.experiment_id) as run:
     # Preprocess
-    test_size = 0.25
-    trainset, testset = preprocess(test_size)
-    mlflow.log_param("test_size", test_size)
-    mlflow.log_param("model_name", "svd")
-    mlflow.log_param("dataset", "ml-lm")
+    user_num = 1000
+    trainset, testset = preprocess(user_num)
+    mlflow.log_param("user_num", user_num)
+    mlflow.log_param("model_name", "SVD")
+    mlflow.log_param("dataset", "ml-10m")
 
     # model training
     algo = train_model(trainset)
