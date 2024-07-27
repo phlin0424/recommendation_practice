@@ -3,15 +3,6 @@ FROM python:3.11-slim
 WORKDIR  /app
 RUN mkdir /app/src
 
-# Install poetry
-RUN pip install poetry
-
-# Copy poetry realted files
-COPY pyproject.toml poetry.lock /app/
-
-# Copy the pipline scripts
-COPY src /app/src
-
 # Install gcc and other necessary build tools
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -19,9 +10,19 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libpython3-dev
 
+# Install poetry
+RUN pip install --upgrade pip && \
+    pip install poetry
+
+# Copy poetry realted files
+COPY pyproject.toml poetry.lock /app/
+
+# Copy the pipline scripts
+COPY src /app/src
+
 # Install the dependencies usnig poetry
 RUN poetry config virtualenvs.in-project true
-RUN poetry install
+RUN poetry install --with pipeline
 
 
 # Launch the ML pipeline
