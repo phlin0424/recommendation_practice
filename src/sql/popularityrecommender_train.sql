@@ -27,8 +27,8 @@ split_ratings as (
         ranked.movie_id,
         ranked.rating, 
         CASE
-            WHEN rank <= 5 THEN 'train'
-            ELSE 'test'
+            WHEN rank <= 5 THEN 'test'
+            ELSE 'train'
         END AS label
     from (
         select 
