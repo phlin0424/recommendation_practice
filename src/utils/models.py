@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datareader.ml_data_base import AbstractDatas
 from datareader.ml_10m_data import IntegratedDatas, PopularityDatas, BaseData
 import numpy as np
 from utils.evaluation_metrics import Metrics
@@ -17,6 +18,20 @@ np.random.seed(0)
 
 
 class BaseRecommender(ABC):
+    def __init__(self, input_data: AbstractDatas):
+        # Split the data into train& test
+        train_data, test_data = input_data.split_data()
+        self.train_data = train_data
+        self.test_data = test_data
+
+        # Get the ground truth data
+        self._true_ratings = self.get_true_ratings(test_data)
+        self._true_user2items = self.get_true_user2items(test_data)
+
+        # Initialize the predictions
+        self._pred_ratings = None
+        self._pred_user2items = None
+
     @abstractmethod
     def train():
         """Training process"""
@@ -63,32 +78,29 @@ class BaseRecommender(ABC):
                 true_user2items[row.user_id].append(row.movie_id)
         return true_user2items
 
-
-class RandomRecommender(BaseRecommender):
-    def __init__(self, random_datas: IntegratedDatas):
-        train_data, test_data = random_datas.split_data()
-        self.train_data = train_data
-        self.test_data = test_data
-        self.pred_matrix = None
-
-        self.__true_ratings = self.get_true_ratings(test_data)
-        self.__true_user2items = self.get_true_user2items(test_data)
-
     @property
     def true_ratings(self):
-        return self.__true_ratings
+        return self._true_ratings
 
     @property
     def pred_ratings(self):
-        return self.__pred_ratings
+        return self._pred_ratings
 
     @property
     def true_user2items(self):
-        return self.__true_user2items
+        return self._true_user2items
 
     @property
     def pred_user2items(self):
-        return self.__pred_user2items
+        return self._pred_user2items
+
+
+class RandomRecommender(BaseRecommender):
+    def __init__(self, random_datas: IntegratedDatas):
+        super().__init__(input_data=random_datas)
+
+        # Initialize the prediction matrix
+        self.pred_matrix = None
 
     def train(self):
         logging.info("RandomRecommender: Training")
@@ -173,8 +185,8 @@ class RandomRecommender(BaseRecommender):
                     break
 
         # Save the prediction result
-        self.__pred_ratings = predict_ratings
-        self.__pred_user2items = pred_user2items
+        self._pred_ratings = predict_ratings
+        self._pred_user2items = pred_user2items
 
     def evaluate(self) -> Metrics:
         """Evaluate the predicted recommendation result.
@@ -184,15 +196,15 @@ class RandomRecommender(BaseRecommender):
         """
         logging.info("RandomRecommender: Calculating metrics")
         metrics = Metrics.from_ml_10m_data(
-            true_ratings=self.__true_ratings,
-            pred_ratings=self.__pred_ratings,
-            true_user2items=self.__true_user2items,
-            pred_user2items=self.__pred_user2items,
+            true_ratings=self._true_ratings,
+            pred_ratings=self._pred_ratings,
+            true_user2items=self._true_user2items,
+            pred_user2items=self._pred_user2items,
         )
         return metrics
 
 
-class PopularityRecommender:
+class PopularityRecommender(BaseRecommender):
     def __init__(self, popularity_data: PopularityDatas):
         # Load the necessary data from the input model base
         self.ave_ratings = popularity_data.ave_ratings
@@ -202,6 +214,9 @@ class PopularityRecommender:
         train_data, test_data = popularity_data.split_data()
         self.train_data = train_data
         self.test_data = test_data
+
+        self.__true_ratings = self.get_true_ratings(test_data)
+        self.__true_user2items = self.get_true_user2items(test_data)
 
     def train(self):
         pass
@@ -221,25 +236,6 @@ class PopularityRecommender:
     @property
     def pred_user2items(self):
         return self.__pred_user2items
-
-    def _get_true_user2items(self):
-        # List of the user id in test data
-        test_user_id = [item.user_id for item in self.test_data]
-
-        # get the lists of the rated movies for each user
-        true_user2items_all = defaultdict(list)
-        for row in self.all_data:
-            true_user2items_all[row.user_id].append(row.movie_id)
-
-        # sort the movie according to the rarings
-        for user_id in true_user2items_all:
-            true_user2items_all[user_id].sort()
-
-        true_user2items = {
-            user_id: true_user2items_all[user_id] for user_id in test_user_id
-        }
-
-        self.__true_user2items = true_user2items
 
     def predict(self):
         ave_ratings = self.ave_ratings
