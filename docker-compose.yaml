@@ -1,15 +1,17 @@
 version: '3.8'
 
 services:
-  pipeline:
+  pipeline_random:
     build:
       context: .
       dockerfile: DockerfilePipeline  # Name of the Dockerfile for the pipeline service
     volumes:
-      - ./mlflow/artifacts:/app/mlflow/artifacts # Mount the 
+      - ./mlflow/artifacts:/app/mlflow/artifacts
       - ./mlflow:/app/mlflow/
     env_file:
       - .env
+    environment:
+      - PIPELINE_NAME=RandomRecommender
 
   ftp-server:
     image: stilliard/pure-ftpd:latest
