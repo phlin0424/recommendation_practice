@@ -24,7 +24,5 @@ COPY src /app/src
 RUN poetry config virtualenvs.in-project true
 RUN poetry install --with pipeline
 
-
-# Launch the ML pipeline
-CMD ["poetry", "run", "python", "src/scripts/run_pipeline_random.py"]
-
+# Use entrypoint script to run the appropriate pipeline
+ENTRYPOINT [ "poetry", "run", "python", "src/entrypoint.py"]
