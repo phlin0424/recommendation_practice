@@ -12,6 +12,18 @@ services:
       - .env
     environment:
       - PIPELINE_NAME=RandomRecommender
+  
+  pipeline_svd:
+    build:
+      context: .
+      dockerfile: DockerfilePipeline  
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=SVD
 
   ftp-server:
     image: stilliard/pure-ftpd:latest
