@@ -1,8 +1,7 @@
-from utils.pipeline_logging import configure_logging
-
 import joblib
 from core.config import DIR_PATH, settings
-from pipelines.pipeline_random import preprocess, train_model, evaluate_model
+from pipelines.pipeline_random import evaluate_model, preprocess, train_model
+from utils.pipeline_logging import configure_logging
 
 import mlflow
 

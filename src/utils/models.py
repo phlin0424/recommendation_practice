@@ -1,16 +1,17 @@
+import logging
 from abc import ABC, abstractmethod
-from datareader.ml_data_base import AbstractDatas
+from collections import defaultdict
+
+import numpy as np
 from datareader.ml_10m_data import (
-    IntegratedDatas,
-    PopularityDatas,
     BaseData,
     IntegratedData,
+    IntegratedDatas,
     PopularityAveRating,
+    PopularityDatas,
 )
-import numpy as np
+from datareader.ml_data_base import AbstractDatas
 from utils.evaluation_metrics import Metrics
-from collections import defaultdict
-import logging
 from utils.pipeline_logging import configure_logging
 
 # Set up log

@@ -1,9 +1,10 @@
+import os
+
 from core.config import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
-import os
 
 if os.getenv("ENV") == "local":
     DB_HOST = "localhost"
