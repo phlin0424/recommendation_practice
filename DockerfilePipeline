@@ -26,5 +26,5 @@ RUN poetry install --with pipeline
 
 
 # Launch the ML pipeline
-CMD ["poetry", "run", "python", "src/scripts/run_pipeline_svd.py"]
+CMD ["poetry", "run", "python", "src/scripts/run_pipeline_random.py"]
 
