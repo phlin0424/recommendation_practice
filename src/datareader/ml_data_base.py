@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
-from typing import TypeVar
 from datetime import datetime
 from enum import Enum
+from typing import TypeVar
+
+from pydantic import BaseModel
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++
 # common data loader module, using CRUD
 # can be applied in every schemas and table schema

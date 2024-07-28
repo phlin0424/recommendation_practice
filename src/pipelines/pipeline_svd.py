@@ -1,8 +1,8 @@
-from surprise import accuracy
 import asyncio
-from datareader.ml_10m_data import IntegratedData, IntegratedDatas
-from surprise import Dataset, Reader, SVD
+
 import pandas as pd
+from datareader.ml_10m_data import IntegratedData, IntegratedDatas
+from surprise import SVD, Dataset, Reader, accuracy
 
 
 async def get_data_from_db(user_num=1000):

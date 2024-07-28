@@ -2,9 +2,7 @@ import logging
 
 import joblib
 from core.config import DIR_PATH, settings
-from pipelines.pipeline_svd import evaluation_model
-from pipelines.pipeline_svd import preprocess
-from pipelines.pipeline_svd import train_model
+from pipelines.pipeline_svd import evaluation_model, preprocess, train_model
 
 import mlflow
 

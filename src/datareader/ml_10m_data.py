@@ -1,10 +1,11 @@
 from datetime import datetime
+
+from core.config import settings
 from datareader.db import fetch_datas, get_tables
-from pydantic import BaseModel
 from datareader.ml_data_base import AbstractDatas, BaseData, Label
+from pydantic import BaseModel
 from table_models.ml_10m.settings import Movies as Movies_model
 from table_models.ml_10m.settings import Tags as Tags_model
-from core.config import settings
 
 
 class Rating(BaseModel):

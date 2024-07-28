@@ -1,6 +1,6 @@
-from sklearn.metrics import mean_squared_error
 import numpy as np
 from pydantic import BaseModel
+from sklearn.metrics import mean_squared_error
 
 
 class Metrics(BaseModel):
