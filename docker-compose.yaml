@@ -25,6 +25,18 @@ services:
     environment:
       - PIPELINE_NAME=SVD
 
+  pipeline_popularity:
+    build:
+      context: .
+      dockerfile: DockerfilePipeline  
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=PopularityRecommender
+
   ftp-server:
     image: stilliard/pure-ftpd:latest
     container_name: ftp-server
@@ -32,7 +44,7 @@ services:
       - "21:21"
       - "30000-30009:30000-30009"
     volumes:
-      - $PWD/ftp/data:/home/ftpusers
+      - ./ftp/data:/home/ftpusers
     env_file:
       - .env
     restart: always
