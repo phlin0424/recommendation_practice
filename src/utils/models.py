@@ -11,14 +11,10 @@ import numpy as np
 from utils.evaluation_metrics import Metrics
 from collections import defaultdict
 import logging
+from utils.pipeline_logging import configure_logging
 
 # Set up log
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(name)s [%(levelname)s] %(module)s: %(message)s",
-)
-logger = logging.getLogger(__name__)
-
+logger = configure_logging()
 
 np.random.seed(0)
 
