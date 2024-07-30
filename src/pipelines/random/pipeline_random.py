@@ -67,7 +67,8 @@ def run_pipeline(user_num=1000):
 
 
 if __name__ == "__main__":
-    input_data = preprocess(user_num=1000)
-    recommender = train_model(input_data)
-    metrics = evaluate_model(recommender)
-    logger.info(metrics)
+    # input_data = preprocess(user_num=1000)
+    # recommender = train_model(input_data)
+    # metrics = evaluate_model(recommender)
+    # logger.info(metrics)
+    run_pipeline(user_num=1000)
