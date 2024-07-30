@@ -6,6 +6,7 @@ from utils.models import RandomRecommender
 from utils.pipeline_logging import configure_logging
 import joblib
 from core.config import DIR_PATH, settings
+import os
 
 import mlflow
 
@@ -29,7 +30,10 @@ def evaluate_model(random_recommender: RandomRecommender) -> Metrics:
     return metrics
 
 
-def run_pipeline(user_num=1000):
+def run_pipeline():
+    # Load the necessary parameters
+    user_num = int(os.getenv("USER_NUM", "1000"))
+
     # Set the tracking URI to the local MLflow server
     tracking_uri = settings.tracking_uri
     mlflow.set_tracking_uri(tracking_uri)
@@ -49,7 +53,7 @@ def run_pipeline(user_num=1000):
         # Preprocess
         input_data = preprocess(user_num)
         mlflow.log_param("user_num", user_num)
-        mlflow.log_param("model_name", model_name)
+        mlflow.log_param("model", model_name)
         mlflow.log_param("dataset", "ml-10m")
 
         # Train the model, saving the trained model locally, registering the artifact
@@ -71,4 +75,4 @@ if __name__ == "__main__":
     # recommender = train_model(input_data)
     # metrics = evaluate_model(recommender)
     # logger.info(metrics)
-    run_pipeline(user_num=1000)
+    run_pipeline()
