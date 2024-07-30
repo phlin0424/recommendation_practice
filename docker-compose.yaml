@@ -4,7 +4,8 @@ services:
   pipeline_random:
     build:
       context: .
-      dockerfile: DockerfilePipeline  # Name of the Dockerfile for the pipeline service
+      dockerfile: ./src/pipelines/random/Dockerfile
+      
     volumes:
       - ./mlflow/artifacts:/app/mlflow/artifacts
       - ./mlflow:/app/mlflow/
@@ -13,29 +14,29 @@ services:
     environment:
       - PIPELINE_NAME=RandomRecommender
   
-  pipeline_svd:
-    build:
-      context: .
-      dockerfile: DockerfilePipeline  
-    volumes:
-      - ./mlflow/artifacts:/app/mlflow/artifacts
-      - ./mlflow:/app/mlflow/
-    env_file:
-      - .env
-    environment:
-      - PIPELINE_NAME=SVD
+  # pipeline_svd:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/pipelines/pipeline_svd/
+  #   volumes:
+  #     - ./mlflow/artifacts:/app/mlflow/artifacts
+  #     - ./mlflow:/app/mlflow/
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - PIPELINE_NAME=SVD
 
-  pipeline_popularity:
-    build:
-      context: .
-      dockerfile: DockerfilePipeline  
-    volumes:
-      - ./mlflow/artifacts:/app/mlflow/artifacts
-      - ./mlflow:/app/mlflow/
-    env_file:
-      - .env
-    environment:
-      - PIPELINE_NAME=PopularityRecommender
+  # pipeline_popularity:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/pipelines/popularity  
+  #   volumes:
+  #     - ./mlflow/artifacts:/app/mlflow/artifacts
+  #     - ./mlflow:/app/mlflow/
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - PIPELINE_NAME=PopularityRecommender
 
   ftp-server:
     image: stilliard/pure-ftpd:latest
