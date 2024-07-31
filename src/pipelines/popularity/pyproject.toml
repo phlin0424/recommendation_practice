@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "recommendation-practice"
+version = "0.1.0"
+description = ""
+authors = ["PH <phlin@example.com>"]
+packages = [
+    {include = "datareader", from = "src"},
+    {include = "utils", from = "src"}, 
+    {include = "core", from = "src"}, 
+    {include = "table_models", from = "src"}
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.25"
+mlflow = "^2.14.2"
+pydantic = "^2.8.2"
+joblib = "^1.4.2"
+pgvector = "^0.3.0"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+greenlet = "^3.0.3"
+pydantic-settings = "^2.3.4"
+
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.27.0"
+ruff = "^0.5.1"
+pandas = "^2.2.2"
+ipykernel = "^6.29.5"
+matplotlib = "^3.9.1"
+pytest = "^8.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+ignore = ["F841"]
+
+[tool.poe.tasks]
+test = "pytest tests/"
+lint = "poetry run ruff check src tests --fix"
+format = "poetry run ruff format src tests"
+isort = "poetry run ruff check src tests --select I --fix-only"
+db = "docker-compose exec db psql -U postgres -d pgvector_db"
+x = ["lint", "format", "isort"]

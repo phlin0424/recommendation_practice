@@ -8,6 +8,7 @@ import joblib
 from core.config import DIR_PATH, settings
 
 import mlflow
+import os
 
 logger = configure_logging()
 
@@ -25,13 +26,18 @@ def train_model(popularity_datas: PopularityDatas) -> PopularityRecommender:
     return popularity_recommender
 
 
-def evaluate_model(popularity_recommender: PopularityRecommender) -> Metrics:
-    popularity_recommender.predict()
+def evaluate_model(
+    popularity_recommender: PopularityRecommender, threshold: int
+) -> Metrics:
+    popularity_recommender.predict(threshold=threshold)
     metrics = popularity_recommender.evaluate()
     return metrics
 
 
-def run_pipeline(user_num=1000):
+def run_pipeline():
+    user_num = int(os.getenv("USER_NUM", "1000"))
+    threshold = int(os.getenv("THRESHOLD", "10"))
+
     # Set the tracking URI to the local MLflow server
     tracking_uri = settings.tracking_uri
     mlflow.set_tracking_uri(tracking_uri)
@@ -51,6 +57,7 @@ def run_pipeline(user_num=1000):
         # Preprocess
         input_data = preprocess(user_num)
         mlflow.log_param("user_num", user_num)
+        mlflow.log_param("threshold", threshold)
         mlflow.log_param("model_name", model_name)
         mlflow.log_param("dataset", "ml-10m")
 
@@ -61,7 +68,7 @@ def run_pipeline(user_num=1000):
         logger.info(f"Model saved to {model_filename}")
 
         # Predict & Evaluate
-        metrics = evaluate_model(algo)
+        metrics = evaluate_model(algo, threshold)
         mlflow.log_metric("rmse", metrics.rmse)
         mlflow.log_metric("recall_at_k", metrics.recall_at_k)
         mlflow.log_metric("precision_at_k", metrics.precision_at_k)
@@ -69,7 +76,8 @@ def run_pipeline(user_num=1000):
 
 
 if __name__ == "__main__":
-    input_data = preprocess(user_num=1000)
-    recommender = train_model(input_data)
-    metrics = evaluate_model(recommender)
-    logger.info(metrics)
+    # input_data = preprocess(user_num=1000)
+    # recommender = train_model(input_data)
+    # metrics = evaluate_model(recommender)
+    # logger.info(metrics)
+    run_pipeline()
