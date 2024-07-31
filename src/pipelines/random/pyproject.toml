@@ -6,7 +6,8 @@ authors = ["PH <phlin@example.com>"]
 packages = [
     {include = "datareader", from = "src"},
     {include = "utils", from = "src"}, 
-    {include = "core", from = "src"}
+    {include = "core", from = "src"}, 
+    {include = "table_models", from = "src"}
 ]
 
 
