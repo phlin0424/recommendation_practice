@@ -2,7 +2,7 @@ import asyncio
 
 from datareader.ml_10m_data import PopularityDatas
 from utils.evaluation_metrics import Metrics
-from utils.models import PopularityRecommender
+from pipelines.popularity.model import PopularityRecommender
 from utils.pipeline_logging import configure_logging
 import joblib
 from core.config import DIR_PATH, settings
@@ -76,8 +76,8 @@ def run_pipeline():
 
 
 if __name__ == "__main__":
-    # input_data = preprocess(user_num=1000)
+    # input_data = preprocess(1000)
     # recommender = train_model(input_data)
-    # metrics = evaluate_model(recommender)
+    # metrics = evaluate_model(recommender, 10)
     # logger.info(metrics)
     run_pipeline()
