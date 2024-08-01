@@ -7,7 +7,8 @@ packages = [
     {include = "datareader", from = "src"},
     {include = "utils", from = "src"}, 
     {include = "table_models", from = "src"},
-    {include = "core", from = "src"}
+    {include = "core", from = "src"},
+    {include = "pipelines", from = "src"}
 ]
 
 
@@ -25,6 +26,9 @@ pydantic-settings = "^2.3.4"
 
 [tool.poetry.group.pipeline.dependencies]
 scikit-surprise = "^1.1.4"
+
+[tool.poetry.group.association.dependencies]
+mlxtend = "^0.23.1"
 
 
 [tool.poetry.group.dev.dependencies]
