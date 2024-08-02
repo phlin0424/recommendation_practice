@@ -1,14 +1,13 @@
 import asyncio
+import os
 
+import joblib
+import mlflow
+from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
 from utils.evaluation_metrics import Metrics
 from utils.models import RandomRecommender
 from utils.pipeline_logging import configure_logging
-import joblib
-from core.config import DIR_PATH, settings
-import os
-
-import mlflow
 
 logger = configure_logging()
 

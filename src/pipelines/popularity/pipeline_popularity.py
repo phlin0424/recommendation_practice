@@ -1,14 +1,13 @@
 import asyncio
-
-from datareader.ml_10m_data import PopularityDatas
-from utils.evaluation_metrics import Metrics
-from pipelines.popularity.model import PopularityRecommender
-from utils.pipeline_logging import configure_logging
-import joblib
-from core.config import DIR_PATH, settings
-
-import mlflow
 import os
+
+import joblib
+import mlflow
+from core.config import DIR_PATH, settings
+from datareader.ml_10m_data import PopularityDatas
+from pipelines.popularity.model import PopularityRecommender
+from utils.evaluation_metrics import Metrics
+from utils.pipeline_logging import configure_logging
 
 logger = configure_logging()
 
