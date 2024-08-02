@@ -1,13 +1,13 @@
-from utils.models import BaseRecommender
+from collections import defaultdict
+
 from datareader.ml_10m_data import (
-    PopularityDatas,
     IntegratedData,
     PopularityAveRating,
+    PopularityDatas,
 )
 from utils.evaluation_metrics import Metrics
-from collections import defaultdict
+from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
-
 
 # Set up log
 logger = configure_logging()

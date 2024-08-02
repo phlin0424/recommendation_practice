@@ -1,9 +1,10 @@
-from datareader.ml_10m_data import IntegratedDatas
-from utils.pipeline_logging import configure_logging
-from utils.models import BaseRecommender
-from utils.evaluation_metrics import Metrics
-import numpy as np
 from collections import defaultdict
+
+import numpy as np
+from datareader.ml_10m_data import IntegratedDatas
+from utils.evaluation_metrics import Metrics
+from utils.models import BaseRecommender
+from utils.pipeline_logging import configure_logging
 
 logger = configure_logging()
 

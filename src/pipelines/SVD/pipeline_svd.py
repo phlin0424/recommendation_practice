@@ -1,10 +1,10 @@
 import asyncio
 
+import joblib
 import pandas as pd
+from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedData, IntegratedDatas
 from surprise import SVD, Dataset, Reader, accuracy
-import joblib
-from core.config import DIR_PATH, settings
 from utils.pipeline_logging import configure_logging
 
 import mlflow

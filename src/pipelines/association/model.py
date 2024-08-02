@@ -1,13 +1,12 @@
-from utils.models import BaseRecommender
-from datareader.ml_10m_data import IntegratedDatas, IntegratedData
-import pandas as pd
-from mlxtend.frequent_patterns import apriori, association_rules
-from collections import defaultdict
-import numpy as np
-from collections import Counter
-from utils.evaluation_metrics import Metrics
-from utils.pipeline_logging import configure_logging
+from collections import Counter, defaultdict
 
+import numpy as np
+import pandas as pd
+from datareader.ml_10m_data import IntegratedData, IntegratedDatas
+from mlxtend.frequent_patterns import apriori, association_rules
+from utils.evaluation_metrics import Metrics
+from utils.models import BaseRecommender
+from utils.pipeline_logging import configure_logging
 
 logger = configure_logging()
 
