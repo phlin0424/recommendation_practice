@@ -15,7 +15,7 @@ RUN pip install --upgrade pip && \
     pip install poetry
 
 # Copy the poetry file to run the pipeline
-COPY pyproject.toml /app/pyproject.toml
+COPY src/pipelines/popularity/pyproject.toml /app/pyproject.toml
 
 # Copy the module codes
 COPY src /app/src
