@@ -40,6 +40,17 @@ services:
     environment:
       - PIPELINE_NAME=PopularityPopularity
 
+  pipeline_association:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/association/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+      - ./src/pipelines/association/pipeline_params.env
+
   ftp-server:
     image: stilliard/pure-ftpd:latest
     container_name: ftp-server

@@ -33,7 +33,7 @@ class AssociationRecommender(BaseRecommender):
     def _create_rating_matrix(self):
         matrix = self.train_df.pivot(
             index="user_id", columns="movie_id", values="rating"
-        ).fillna(0)
+        )
 
         self.rating_matrix = matrix
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         f"""
         model: AssociationRecommender
         rmse: {metrics.rmse},
-        recall_at_k: {metrics.recall_at_k},
-        precision_at_k:{metrics.precision_at_k}
+        precision_at_k:{metrics.precision_at_k}, 
+        recall_at_k: {metrics.recall_at_k}
         """
     )
