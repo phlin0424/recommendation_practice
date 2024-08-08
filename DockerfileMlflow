@@ -2,4 +2,4 @@ FROM python:3.8
 RUN mkdir -p /work/mlflow
 
 RUN pip install --upgrade pip && \
-    pip install mlflow
+    pip install mlflow==2.14.2
