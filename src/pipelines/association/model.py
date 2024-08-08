@@ -113,7 +113,7 @@ class AssociationRecommender(BaseRecommender):
             # Sort the list of movie_id by the timestamp (second element of each sublist)
             movie_ids.sort(key=lambda x: x[1], reverse=True)
             sorted_movie_ids = user2items[user_id] = [item[0] for item in movie_ids]
-            user2items[user_id] = sorted_movie_ids[-5:]
+            user2items[user_id] = sorted_movie_ids[:5]
 
         return user2items
 
@@ -129,11 +129,6 @@ class AssociationRecommender(BaseRecommender):
         user2items = self.group_by_user_id(self.train_data)
         user2items_last5 = self.sort_movie_id(user2items)
 
-        # Get the antecedents values
-        antecedents_rule_list = self.rules["antecedents"].values
-        consequents_rule_list = self.rules["consequents"].values
-        lift_rule_list = self.rules["lift"].values
-
         # Initialize pred_user2items
         pred_user2items = defaultdict(list)
 
@@ -142,25 +137,24 @@ class AssociationRecommender(BaseRecommender):
             input_data = movie_ids
 
             # In the rule table, find the row that has at least one item matches antecedents
-            matchted_flg = [
-                True if len(set(input_data) & item) >= 1 else False
-                for item in antecedents_rule_list
-            ]
+            matched_flg = (
+                self.rules.antecedents.apply(lambda x: len(set(input_data) & x)) >= 1
+            )
+            matched_flg = matched_flg.to_list()
 
             # Find the related consequents and sort it by the lift value
-            consequent_movies = consequents_rule_list[matchted_flg]
-            lift_movies = lift_rule_list[matchted_flg]
-            sort_ind = np.argsort(lift_movies)
-            consequent_movies_sorted = consequent_movies[sort_ind]
+            consequent_movies_sorted = []
+            for i, row in self.rules.sort_values("lift", ascending=False).iterrows():
+                consequent_movies_sorted.extend(row["consequents"])
 
             # Find the movies that appears at `consequent_movies_sorted` list most frequently
             consequent_counter = Counter(consequent_movies_sorted)
             for movie_id, movie_cnt in consequent_counter.most_common():
                 if movie_id not in self.user_watched_movies[user_id]:
-                    pred_user2items[user_id].extend(movie_id)
+                    pred_user2items[user_id].append(movie_id)
 
                 # Only recommend the first 10 movies
-                if pred_user2items[user_id].extend(movie_id):
+                if pred_user2items[user_id] == 10:
                     break
 
         self._pred_user2items = pred_user2items
@@ -183,7 +177,7 @@ if __name__ == "__main__":
 
     input_data = asyncio.run(IntegratedDatas.from_db())
     # print(input_data.ave_ratings[0:10])
-    recommender = AssociationRecommender(input_data)
+    recommender = AssociationRecommender(input_data, 0.01)
     recommender.train()
     recommender.predict()
     metrics = recommender.evaluate()
