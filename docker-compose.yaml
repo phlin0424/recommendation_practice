@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+ # use `docker-compose --profile pipeline_random up` to start the pipeline.
   pipeline_random:
     build:
       context: .
@@ -14,6 +15,8 @@ services:
       - ./src/pipelines/random/pipeline_params.env
     environment:
       - PIPELINE_NAME=RandomRecommender
+    profiles:
+      - pipeline_random
   
   # pipeline_svd:
   #   build:
@@ -27,6 +30,8 @@ services:
   #   environment:
   #     - PIPELINE_NAME=SVD
 
+
+ # use `docker-compose --profile pipeline_popularity up` to start the pipeline.
   pipeline_popularity:
     build:
       context: .
@@ -39,7 +44,10 @@ services:
       - ./src/pipelines/popularity/pipeline_params.env
     environment:
       - PIPELINE_NAME=PopularityPopularity
+    profiles:
+      - pipeline_popularity
 
+ # use `docker-compose --profile pipeline_association up` to start the pipeline.
   pipeline_association:
     build:
       context: .
@@ -50,6 +58,8 @@ services:
     env_file:
       - .env
       - ./src/pipelines/association/pipeline_params.env
+    profiles:
+      - pipeline_association
 
   ftp-server:
     image: stilliard/pure-ftpd:latest
@@ -62,7 +72,6 @@ services:
     env_file:
       - .env
     restart: always
-
 
   mlflow-server:
     build:
