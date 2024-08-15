@@ -6,7 +6,7 @@ import mlflow
 from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
 from utils.evaluation_metrics import Metrics
-from utils.models import RandomRecommender
+from pipelines.random.model import RandomRecommender
 from utils.pipeline_logging import configure_logging
 
 logger = configure_logging()
