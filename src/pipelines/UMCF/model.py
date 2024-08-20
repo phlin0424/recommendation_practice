@@ -5,8 +5,107 @@ from datareader.ml_10m_data import IntegratedDatas, IntegratedData
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
+from surprise import KNNWithMeans, Reader
+from surprise import Dataset as SurpriseDataset
+from collections import defaultdict
+import pandas as pd
 
 logger = configure_logging()
+
+
+class UMCFSvdRecommender(BaseRecommender):
+    def __init__(self, random_datas: IntegratedDatas):
+        super().__init__(input_data=random_datas)
+
+        # Transform the dataset into dataframe
+        self._get_df()
+
+        # Create a dataset that will be used in SVD
+        reader = Reader(rating_scale=(0.5, 5))
+        self.data_train = SurpriseDataset.load_from_df(
+            self.train_df[["user_id", "movie_id", "rating"]], reader
+        ).build_full_trainset()
+
+        # Create the test data using the opposite of the train data
+        self.data_test = self.data_train.build_anti_testset(None)
+
+    def _get_df(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Transform the dataset into Data frame format
+
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame]: _description_
+        """
+        self.train_df = pd.DataFrame(
+            [rating.model_dump() for rating in self.train_data]
+        )
+        self.test_df = pd.DataFrame(
+            [rating.model_dump() for rating in self.test_data],
+        )
+
+    @staticmethod
+    def _get_top_n(predictions, n=10):
+        top_n = defaultdict(list)
+        for uid, iid, true_r, est, _ in predictions:
+            top_n[uid].append((iid, est))
+        # iterate the predictions, sorting the items based on the rating
+        for uid, user_ratings in top_n.items():
+            user_ratings.sort(key=lambda x: x[1], reverse=True)
+            top_n[uid] = [d[0] for d in user_ratings[:n]]
+
+        return top_n
+
+    def train(self):
+        # Use pearson to calculate the nearest users
+        sim_options = {"name": "pearson", "user_based": True}
+        knn = KNNWithMeans(k=30, min_k=1, sim_options=sim_options)
+        knn.fit(self.data_train)
+
+        self.algo = knn
+
+    def __find_nearest_user(self, user_id: int):
+        knn = self.algo
+        user_inner_id = knn.trainset.to_inner_uid(user_id)
+        neighbors = knn.get_neighbors(user_inner_id, k=10)
+        neighbors = [knn.trainset.to_raw_uid(inner_id) for inner_id in neighbors]
+
+    def predict(self):
+        logger.info("UMCFRSvdRecommender: predicting")
+
+        knn = self.algo
+        predictions = knn.test(self.data_test)
+        self._pred_user2items = self._get_top_n(predictions, n=10)
+
+        average_score = self.train_df["rating"].mean()
+        pred_results = []
+        for _, row in self.test_df.iterrows():
+            user_id = row["user_id"]
+            movie_id = row["movie_id"]
+
+            if (
+                user_id not in self.data_train._raw2inner_id_users
+                or movie_id not in self.data_train._raw2inner_id_items
+            ):
+                pred_results.append(average_score)
+                continue
+            pred_score = knn.predict(uid=user_id, iid=movie_id).est
+            pred_results.append(pred_score)
+        self._pred_ratings = pred_results
+
+    def evaluate(self) -> Metrics:
+        """Evaluate the predicted recommendation result.
+
+        Returns:
+            Metrics: Evaluation results of the prediction.
+        """
+        logger.info("UMCFRSvdRecommender: Calculating metrics")
+
+        metrics = Metrics.from_ml_10m_data(
+            true_ratings=self._true_ratings,
+            pred_ratings=self._pred_ratings,
+            true_user2items=self._true_user2items,
+            pred_user2items=self._pred_user2items,
+        )
+        return metrics
 
 
 class UMCFRecommender(BaseRecommender):
@@ -182,10 +281,18 @@ class UMCFRecommender(BaseRecommender):
 
             # The prediction result goes here:
             self.prediction_results = prediction_results
+
+            # It takes time when using this algorithm so we don't calculate this metric this time.
             self._pred_user2items = defaultdict(list)
 
-    def predict(self):
-        self._predict_naive()
+    def _predict_non_naive(self):
+        pass
+
+    def predict(self, naive=False):
+        if naive:
+            self._predict_naive()
+        else:
+            self._predict_non_naive()
 
         # Re-order the predicted ratings
         pred_ratings_dict = {
