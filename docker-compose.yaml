@@ -17,6 +17,22 @@ services:
       - PIPELINE_NAME=RandomRecommender
     profiles:
       - pipeline_random
+
+  # use `docker-compose --profile pipeline_umcf up` to start the pipeline.
+  pipeline_umcf:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/UMCF/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+      - ./src/pipelines/UMCF/pipeline_params.env
+    environment:
+      - PIPELINE_NAME=UMCFRecommender
+    profiles:
+      - pipeline_umcf
   
   # pipeline_svd:
   #   build:
