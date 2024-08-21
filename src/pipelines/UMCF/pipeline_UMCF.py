@@ -5,7 +5,7 @@ import joblib
 import mlflow
 from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
-from pipelines.UMCF.model import UMCFSvdRecommender
+from pipelines.UMCF.model import UMCFSurpriseRecommender
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
 
@@ -17,13 +17,13 @@ def preprocess(user_num) -> IntegratedDatas:
     return integrated_datas
 
 
-def train_model(integrated_datas: IntegratedDatas) -> UMCFSvdRecommender:
-    recommender = UMCFSvdRecommender(integrated_datas)
+def train_model(integrated_datas: IntegratedDatas) -> UMCFSurpriseRecommender:
+    recommender = UMCFSurpriseRecommender(integrated_datas)
     recommender.train()
     return recommender
 
 
-def evaluate_model(recommender: UMCFSvdRecommender) -> Metrics:
+def evaluate_model(recommender: UMCFSurpriseRecommender) -> Metrics:
     recommender.predict()
     metrics = recommender.evaluate()
     return metrics
@@ -38,7 +38,7 @@ def run_pipeline():
     mlflow.set_tracking_uri(tracking_uri)
 
     # Setting of the pipeline
-    model_name = "UMCFRecommender_model (SVD)"
+    model_name = "UMCFRecommender_model (Surprise)"
     model_output_fname = f"{model_name}.pkl"
     model_filename = DIR_PATH / f"mlflow/artifacts/{model_output_fname}"
 

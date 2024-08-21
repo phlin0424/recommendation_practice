@@ -12,7 +12,7 @@ from utils.pipeline_logging import configure_logging
 logger = configure_logging()
 
 
-class UMCFSvdRecommender(BaseRecommender):
+class UMCFSurpriseRecommender(BaseRecommender):
     def __init__(self, random_datas: IntegratedDatas):
         super().__init__(input_data=random_datas)
 
