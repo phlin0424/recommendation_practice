@@ -1,14 +1,13 @@
 from collections import defaultdict
 
 import numpy as np
-from datareader.ml_10m_data import IntegratedDatas, IntegratedData
+import pandas as pd
+from datareader.ml_10m_data import IntegratedData, IntegratedDatas
+from surprise import Dataset as SurpriseDataset
+from surprise import KNNWithMeans, Reader
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
-from surprise import KNNWithMeans, Reader
-from surprise import Dataset as SurpriseDataset
-from collections import defaultdict
-import pandas as pd
 
 logger = configure_logging()
 
