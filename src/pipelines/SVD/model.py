@@ -62,7 +62,7 @@ class SVDRecommender(BaseRecommender):
 
         self.train_rating_matrix = train_rating_matrix
 
-    def train(self):
+    def train(self, factor=5, fill_with_zero=False):
         logger.info("SVDRecommender: Training")
 
         self._get_unique_ids()
@@ -74,10 +74,13 @@ class SVDRecommender(BaseRecommender):
         self.rating_mean = train_rating_mean
 
         m = self.train_rating_matrix.copy()
-        m[np.isnan(m)] = train_rating_mean
+        if not fill_with_zero:
+            m[np.isnan(m)] = train_rating_mean
+        else:
+            m[np.isnan(m)] = 0
 
         # Apply SVD
-        P, S, Qt = scipy.sparse.linalg.svds(m, k=5)
+        P, S, Qt = scipy.sparse.linalg.svds(m, k=factor)
 
         # Use SVD to predict
         pred_matrix = np.dot(np.dot(P, np.diag(S)), Qt)

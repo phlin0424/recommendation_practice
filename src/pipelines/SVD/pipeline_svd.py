@@ -17,9 +17,11 @@ def preprocess(user_num) -> IntegratedDatas:
     return integrated_datas
 
 
-def train_model(integrated_datas: IntegratedDatas) -> SVDRecommender:
+def train_model(
+    integrated_datas: IntegratedDatas, factor, fill_with_zero
+) -> SVDRecommender:
     random_recommender = SVDRecommender(integrated_datas)
-    random_recommender.train()
+    random_recommender.train(factor=factor, fill_with_zero=fill_with_zero)
     return random_recommender
 
 
@@ -32,6 +34,8 @@ def evaluate_model(random_recommender: SVDRecommender) -> Metrics:
 def run_pipeline():
     # Load the necessary parameters
     user_num = int(os.getenv("USER_NUM", "1000"))
+    factor = int(os.getenv("FACTOR", "5"))
+    fill_with_zero = bool(int(os.getenv("FILL_WITH_ZERO", "0")))
 
     # Set the tracking URI to the local MLflow server
     tracking_uri = settings.tracking_uri
@@ -51,12 +55,18 @@ def run_pipeline():
     with mlflow.start_run(experiment_id=settings.experiment_id, run_name="SVD") as run:
         # Preprocess
         input_data = preprocess(user_num)
-        mlflow.log_param("user_num", user_num)
-        mlflow.log_param("model", model_name)
-        mlflow.log_param("dataset", "ml-10m")
+        mlflow.log_params(
+            {
+                "user_num": user_num,
+                "model": model_name,
+                "dataset": "ml-10m",
+                "factor": factor,
+                "fill_with_zero": fill_with_zero,
+            }
+        )
 
         # Train the model, saving the trained model locally, registering the artifact
-        algo = train_model(input_data)
+        algo = train_model(input_data, factor, fill_with_zero)
         joblib.dump(algo, model_filename)
         mlflow.log_artifact(model_filename, artifact_path="models")
         logger.info(f"Model saved to {model_filename}")
