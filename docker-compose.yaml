@@ -33,18 +33,22 @@ services:
       - PIPELINE_NAME=UMCFRecommender
     profiles:
       - pipeline_umcf
-  
-  # pipeline_svd:
-  #   build:
-  #     context: .
-  #     dockerfile: ./src/pipelines/pipeline_svd/
-  #   volumes:
-  #     - ./mlflow/artifacts:/app/mlflow/artifacts
-  #     - ./mlflow:/app/mlflow/
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - PIPELINE_NAME=SVD
+
+  # use `docker-compose --profile pipeline_svd up` to start the pipeline.
+  pipeline_svd:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/SVD/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+      - ./src/pipelines/SVD/pipeline_params.env
+    environment:
+      - PIPELINE_NAME=SVD
+    profiles:
+      - pipeline_svd
 
 
  # use `docker-compose --profile pipeline_popularity up` to start the pipeline.

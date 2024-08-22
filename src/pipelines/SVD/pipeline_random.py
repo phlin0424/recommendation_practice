@@ -5,7 +5,7 @@ import joblib
 import mlflow
 from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
-from pipelines.SVD.model import SVDRecommender
+from pipelines.random.model import RandomRecommender
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
 
@@ -17,13 +17,13 @@ def preprocess(user_num) -> IntegratedDatas:
     return integrated_datas
 
 
-def train_model(integrated_datas: IntegratedDatas) -> SVDRecommender:
-    random_recommender = SVDRecommender(integrated_datas)
+def train_model(integrated_datas: IntegratedDatas) -> RandomRecommender:
+    random_recommender = RandomRecommender(integrated_datas)
     random_recommender.train()
     return random_recommender
 
 
-def evaluate_model(random_recommender: SVDRecommender) -> Metrics:
+def evaluate_model(random_recommender: RandomRecommender) -> Metrics:
     random_recommender.predict()
     metrics = random_recommender.evaluate()
     return metrics
@@ -38,7 +38,7 @@ def run_pipeline():
     mlflow.set_tracking_uri(tracking_uri)
 
     # Setting of the pipeline
-    model_name = "SVDRecommender_model"
+    model_name = "RandomRecommender_model"
     model_output_fname = f"{model_name}.pkl"
     model_filename = DIR_PATH / f"mlflow/artifacts/{model_output_fname}"
 
@@ -48,7 +48,7 @@ def run_pipeline():
     logger.info(f"experiment id: {settings.experiment_id}")
     logger.info(f"experiment name: {settings.experiment_name}")
 
-    with mlflow.start_run(experiment_id=settings.experiment_id, run_name="SVD") as run:
+    with mlflow.start_run(experiment_id=settings.experiment_id) as run:
         # Preprocess
         input_data = preprocess(user_num)
         mlflow.log_param("user_num", user_num)
