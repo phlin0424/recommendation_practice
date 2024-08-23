@@ -16,22 +16,6 @@ class SVDRecommender(BaseRecommender):
     def __init__(self, input_data: IntegratedDatas):
         super().__init__(input_data=input_data)
 
-        # Transform the dataset into dataframe
-        self._get_df()
-
-    def _get_df(self) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Transform the dataset into Data frame format
-
-        Returns:
-            tuple[pd.DataFrame, pd.DataFrame]: _description_
-        """
-        self.train_df = pd.DataFrame(
-            [rating.model_dump() for rating in self.train_data]
-        )
-        self.test_df = pd.DataFrame(
-            [rating.model_dump() for rating in self.test_data],
-        )
-
     def _get_unique_ids(self):
         # Get the unique user id list
         self.unique_user_ids = sorted(set([row.user_id for row in self.train_data]))
