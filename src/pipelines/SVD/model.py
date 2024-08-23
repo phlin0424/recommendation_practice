@@ -1,10 +1,9 @@
 from collections import defaultdict
 
-import scipy.sparse
-import scipy.sparse.linalg
-
 import numpy as np
 import pandas as pd
+import scipy.sparse
+import scipy.sparse.linalg
 from datareader.ml_10m_data import IntegratedDatas
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
