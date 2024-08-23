@@ -48,24 +48,35 @@ def run_pipeline():
     logger.info(f"experiment id: {settings.experiment_id}")
     logger.info(f"experiment name: {settings.experiment_name}")
 
-    with mlflow.start_run(experiment_id=settings.experiment_id) as run:
+    with mlflow.start_run(
+        experiment_id=settings.experiment_id,
+        run_name="random",
+    ) as run:
         # Preprocess
         input_data = preprocess(user_num)
-        mlflow.log_param("user_num", user_num)
-        mlflow.log_param("model", model_name)
-        mlflow.log_param("dataset", "ml-10m")
+        mlflow.log_params(
+            {
+                " user_num": user_num,
+                "model_name": "RandomRecommender_model",
+                "dataset": "ml-10m",
+            }
+        )
 
         # Train the model, saving the trained model locally, registering the artifact
         algo = train_model(input_data)
-        joblib.dump(algo, model_filename)
-        mlflow.log_artifact(model_filename, artifact_path="models")
+        # joblib.dump(algo, model_filename)
+        # mlflow.log_artifact(model_filename, artifact_path="models")
         logger.info(f"Model saved to {model_filename}")
 
         # Predict & Evaluate
         metrics = evaluate_model(algo)
-        mlflow.log_metric("rmse", metrics.rmse)
-        mlflow.log_metric("recall_at_k", metrics.recall_at_k)
-        mlflow.log_metric("precision_at_k", metrics.precision_at_k)
+        mlflow.log_metrics(
+            {
+                "rmse": metrics.rmse,
+                "recall_at_k": metrics.recall_at_k,
+                "precision_at_k": metrics.precision_at_k,
+            }
+        )
         logger.info(metrics)
 
 
