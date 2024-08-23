@@ -1,7 +1,6 @@
 import asyncio
 import os
 
-import joblib
 import mlflow
 from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
