@@ -87,7 +87,7 @@ class RandomRecommender(BaseRecommender):
 
         unique_user_ids_test = sorted(set([row.user_id for row in self.train_data]))
 
-        for user_id in unique_user_ids_test:
+        for user_id in self.unique_user_ids:
             # Collect the movie id rated by each user
             all_movie_id_rating = self._predict_rating(user_id)
 
