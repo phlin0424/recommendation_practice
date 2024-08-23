@@ -58,7 +58,7 @@ def run_pipeline():
         mlflow.log_params(
             {
                 "user_num": user_num,
-                "model": model_name,
+                "model_name": model_name,
                 "dataset": "ml-10m",
                 "factor": factor,
                 "fill_with_zero": fill_with_zero,
