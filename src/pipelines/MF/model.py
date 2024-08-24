@@ -11,7 +11,7 @@ logger = configure_logging()
 
 class MFRecommender(BaseRecommender):
     def __init__(self, input_data: IntegratedDatas):
-        super().__init__(input=input_data)
+        super().__init__(input_data=input_data)
 
         # Transform the dataset into dataframe
         self._get_df()
@@ -46,6 +46,10 @@ class MFRecommender(BaseRecommender):
         return df
 
     def preprocess(self, minimum_num_rating: int = 100):
+        logger.info(
+            f"MFRecommender: Preprocessing the data with minimum_num_rating={minimum_num_rating}"
+        )
+
         filtered_movielens_train = self._filter_data(
             self.train_df, minimum_num_rating=minimum_num_rating
         )
@@ -61,13 +65,19 @@ class MFRecommender(BaseRecommender):
     def train(
         self,
         factors: int = 5,
-        use_biase=False,
+        use_bias=False,
         lr_all=0.005,
         n_epochs=50,
     ):
+        logger.info(
+            f"""MFRecommender: Training with the following settings: 
+                factors={factors}, learning rate: {lr_all}, n_epochs: {n_epochs}, use_bias: {use_bias}
+            """
+        )
+
         # Applying MF to the preprocessed dataset
         matrix_factorization = SVD(
-            n_factors=factors, n_epochs=n_epochs, lr_all=lr_all, biased=use_biase
+            n_factors=factors, n_epochs=n_epochs, lr_all=lr_all, biased=use_bias
         )
         matrix_factorization.fit(self.data_train)
 
@@ -145,3 +155,27 @@ class MFRecommender(BaseRecommender):
             pred_user2items=self._pred_user2items,
         )
         return metrics
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    input_data = asyncio.run(IntegratedDatas.from_db(user_num=100))
+    # print(input_data.ave_ratings[0:10])
+    recommender = MFRecommender(input_data)
+    recommender.preprocess()
+    recommender.train()
+    recommender.predict()
+    # breakpoint()
+    metrics = recommender.evaluate()
+
+    print(recommender.pred_user2items[8])
+
+    logger.info(
+        f"""
+        model: MFRecommender
+        rmse: {metrics.rmse},
+        recall_at_k: {metrics.recall_at_k},
+        precision_at_k:{metrics.precision_at_k}
+        """
+    )
