@@ -68,7 +68,7 @@ class UMCFSurpriseRecommender(BaseRecommender):
         neighbors = [knn.trainset.to_raw_uid(inner_id) for inner_id in neighbors]
 
     def predict(self):
-        logger.info("UMCFRSvdRecommender: predicting")
+        logger.info("UMCFRecommender: predicting (surprise)")
 
         knn = self.algo
         predictions = knn.test(self.data_test)
@@ -96,7 +96,7 @@ class UMCFSurpriseRecommender(BaseRecommender):
         Returns:
             Metrics: Evaluation results of the prediction.
         """
-        logger.info("UMCFRSvdRecommender: Calculating metrics")
+        logger.info("UMCFRecommender: Calculating metrics (surprise)")
 
         metrics = Metrics.from_ml_10m_data(
             true_ratings=self._true_ratings,
