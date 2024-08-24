@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 import numpy as np
-import pandas as pd
 import scipy.sparse
 import scipy.sparse.linalg
 from datareader.ml_10m_data import IntegratedDatas
