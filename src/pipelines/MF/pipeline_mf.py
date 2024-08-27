@@ -29,8 +29,10 @@ class PipelineSettings(BaseSettings):
     )
 
 
-def preprocess(user_num, pipeline_settings: PipelineSettings) -> MFRecommender:
-    integrated_datas = asyncio.run(IntegratedDatas.from_db(user_num=user_num))
+def preprocess(pipeline_settings: PipelineSettings) -> MFRecommender:
+    integrated_datas = asyncio.run(
+        IntegratedDatas.from_db(user_num=pipeline_settings.user_num)
+    )
     recommender = MFRecommender(integrated_datas)
     recommender.preprocess(minimum_num_rating=pipeline_settings.minimum_num_rating)
     return recommender
@@ -107,3 +109,5 @@ if __name__ == "__main__":
     pipeline_settings = PipelineSettings()
 
     run_pipeline(pipeline_settings)
+
+    # print(pipeline_settings)

@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+ # use `docker-compose --profile pipeline_mf up` to start the pipeline.
+  pipeline_mf:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/MF/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+      - ./src/pipelines/MF/pipeline_params.env
+    environment:
+      - PIPELINE_NAME=MF
+    profiles:
+      - pipeline_mf
+
  # use `docker-compose --profile pipeline_random up` to start the pipeline.
   pipeline_random:
     build:

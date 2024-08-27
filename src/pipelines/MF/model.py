@@ -65,9 +65,9 @@ class MFRecommender(BaseRecommender):
     def train(
         self,
         factors: int = 5,
-        use_bias=False,
-        lr_all=0.005,
-        n_epochs=50,
+        use_bias: bool = False,
+        lr_all: float = 0.005,
+        n_epochs: int = 50,
     ):
         logger.info(
             f"""MFRecommender: Training with the following settings: 
