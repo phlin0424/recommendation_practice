@@ -30,6 +30,7 @@ def indices_mapper(
 
 if __name__ == "__main__":
     import asyncio
+
     from datareader.ml_10m_data import IntegratedDatas
 
     intergared_data = asyncio.run(IntegratedDatas.from_db(user_num=10))

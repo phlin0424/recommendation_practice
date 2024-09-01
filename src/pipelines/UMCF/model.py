@@ -6,10 +6,9 @@ from datareader.ml_10m_data import IntegratedData, IntegratedDatas
 from surprise import Dataset as SurpriseDataset
 from surprise import KNNWithMeans, Reader
 from utils.evaluation_metrics import Metrics
+from utils.helper import indices_mapper
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
-from utils.helper import indices_mapper
-
 
 logger = configure_logging()
 

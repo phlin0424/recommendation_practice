@@ -1,12 +1,10 @@
 import asyncio
-import os
 
-import joblib
 import mlflow
-from core.config import DIR_PATH, settings
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from core.config import settings
 from datareader.ml_10m_data import IntegratedDatas
 from pipelines.MF.model import MFRecommender
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
 

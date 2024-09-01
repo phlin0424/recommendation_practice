@@ -1,10 +1,11 @@
-from datareader.ml_10m_data import IntegratedDatas, IntegratedData
-from utils.models import BaseRecommender
-from utils.helper import indices_mapper
 from collections import defaultdict
-from scipy.sparse import coo_matrix
+
 import implicit
+from datareader.ml_10m_data import IntegratedData, IntegratedDatas
+from scipy.sparse import coo_matrix
 from utils.evaluation_metrics import Metrics
+from utils.helper import indices_mapper
+from utils.models import BaseRecommender
 
 
 class IMFRecommender(BaseRecommender):

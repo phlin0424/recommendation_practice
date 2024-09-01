@@ -3,9 +3,9 @@ from collections import defaultdict
 import numpy as np
 from datareader.ml_10m_data import IntegratedDatas
 from utils.evaluation_metrics import Metrics
+from utils.helper import indices_mapper
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
-from utils.helper import indices_mapper
 
 logger = configure_logging()
 

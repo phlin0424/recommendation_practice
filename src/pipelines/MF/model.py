@@ -1,7 +1,8 @@
-import pandas as pd
 from collections import defaultdict
-from surprise import SVD, Reader, Dataset, Prediction
+
+import pandas as pd
 from datareader.ml_10m_data import IntegratedDatas
+from surprise import SVD, Dataset, Prediction, Reader
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
