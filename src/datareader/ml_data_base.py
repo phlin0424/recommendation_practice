@@ -26,6 +26,9 @@ class BaseData(BaseModel):
     timestamp: datetime
     label: Label
 
+    def get(self, key):
+        return getattr(self, key, None)
+
 
 class AbstractDatas(ABC, BaseModel):
     data: list[BaseData]
