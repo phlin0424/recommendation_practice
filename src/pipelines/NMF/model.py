@@ -5,6 +5,7 @@ from datareader.ml_10m_data import IntegratedDatas
 from sklearn.decomposition import NMF
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
+from utils.helper import indices_mapper
 from utils.pipeline_logging import configure_logging
 
 logger = configure_logging()
@@ -23,13 +24,11 @@ class NMFRecommender(BaseRecommender):
         self.unique_movie_ids = sorted(set([row.movie_id for row in self.train_data]))
 
     def _get_indices(self):
-        # Create index-user-id to located the rating in the matrix
-        self.user_id_indices = dict(
-            zip(self.unique_user_ids, range(len(self.unique_user_ids)))
+        self.user_id_indices, _ = indices_mapper(
+            input_data=self.train_data, id_col_name="user_id", reverse=False
         )
-        # Create index-movie-id to located the rating in the matrix
-        self.movie_id_indices = dict(
-            zip(self.unique_movie_ids, range(len(self.unique_movie_ids)))
+        self.movie_id_indices, self.indices_movie_id = indices_mapper(
+            input_data=self.train_data, id_col_name="movie_id", reverse=True
         )
 
     def _create_rating_matrix(self):
@@ -99,11 +98,6 @@ class NMFRecommender(BaseRecommender):
         # Prepare the unique user list which we want to predict:
         unique_user_ids_test = sorted(set([row.user_id for row in self.train_data]))
 
-        # Create a reverse dictionary to referring movie_id from the index
-        index_to_movie_id = {
-            index: movie_id for movie_id, index in self.movie_id_indices.items()
-        }
-
         # predict: the most liked movies for each user based on the inferred rating predictions
         pred_user2items = defaultdict(list)
 
@@ -114,7 +108,7 @@ class NMFRecommender(BaseRecommender):
             # Collect the recommended movie_ids of specific user
             movie_indexes_sorted = np.argsort(-all_movie_id_rating)
             for movie_index in movie_indexes_sorted:
-                movie_id = index_to_movie_id[movie_index]
+                movie_id = self.indices_movie_id[movie_index]
                 if movie_id not in pred_user2items[user_id]:
                     pred_user2items[user_id].append(movie_id)
                 if len(pred_user2items[user_id]) == 10:
@@ -160,3 +154,13 @@ if __name__ == "__main__":
         precision_at_k:{metrics.precision_at_k}
         """
     )
+
+    # 2024-09-01 12:41:59,888 model.utils.pipeline_logging [INFO] NMFRecommender: Training
+    # 2024-09-01 12:42:06,266 model.utils.pipeline_logging [INFO] NMFRecommender: Predicting
+    # 2024-09-01 12:42:06,720 model.utils.pipeline_logging [INFO] NMFRecommender: Calculating metrics
+    # [2571, 296, 1210, 2959, 260, 1196, 110, 318, 2858, 593]
+    # 2024-09-01 12:42:06,722 model.utils.pipeline_logging [INFO]
+    #         model: NMFRecommender
+    #         rmse: 1.062924470118066,
+    #         recall_at_k: 0.032114735658042744,
+    #         precision_at_k:0.010911136107986504
