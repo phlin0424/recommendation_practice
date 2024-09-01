@@ -5,6 +5,7 @@ from datareader.ml_10m_data import IntegratedDatas
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
+from utils.helper import indices_mapper
 
 logger = configure_logging()
 
@@ -22,8 +23,6 @@ class RandomRecommender(BaseRecommender):
         unique_user_ids = sorted(set([row.user_id for row in self.train_data]))
         unique_movie_ids = sorted(set([row.movie_id for row in self.train_data]))
 
-        self.unique_user_ids = unique_user_ids
-
         # Create a predicted ratings matrix using random numbers
         # This matrix would be served as the training result
         pred_matrix = np.random.uniform(
@@ -33,19 +32,30 @@ class RandomRecommender(BaseRecommender):
         # Save the prediction result
         self.pred_matrix = pred_matrix
 
-        # Create a user_id - index dict for the predictor to refer to:
-        # Usage: index (to the matrix)= user_id_indices[user_id]
-        user_id_indices = dict(zip(unique_user_ids, range(len(unique_user_ids))))
-        self.user_id_indices = user_id_indices
-
-        # Create a movie_id - index dict for the predictor to refer to:
-        # Usage: index (to the matrix)= movie_id_indices[movie_id]
-        movie_id_indices = dict(zip(unique_movie_ids, range(len(unique_movie_ids))))
-        self.movie_id_indices = movie_id_indices
+        # Create a user_id to dict and a movie_id to ind  for the predictor to refer to:
+        self.user_id_indices, _ = indices_mapper(
+            input_data=self.train_data, id_col_name="user_id", reverse=True
+        )
+        self.movie_id_indices, self.indices_movie_id = indices_mapper(
+            input_data=self.train_data, id_col_name="movie_id", reverse=True
+        )
 
     def _predict_rating(
         self, user_id: int, movie_id: int | None = None
     ) -> float | list[float]:
+        """Make a prediction for a given user_id and a movie_id
+
+        Args:
+            user_id (int): _description_
+            movie_id (int | None, optional): _description_. Defaults to None.
+
+        Raises:
+            RuntimeError: _description_
+
+        Returns:
+            float | list[float]: _description_
+        """
+
         if self.pred_matrix is None:
             raise RuntimeError("Train the model fist")
 
@@ -64,15 +74,6 @@ class RandomRecommender(BaseRecommender):
 
         # Derive a list of predicted rating values according to the list of user_id and movie_id
         predict_ratings = []
-
-        # Derive a list of dict of a list of movie_id being recommended to the user
-        pred_user2items = defaultdict(list)
-
-        # Create a reverse dictionary to referring movie_id from the index
-        index_to_movie_id = {
-            index: movie_id for movie_id, index in self.movie_id_indices.items()
-        }
-
         # Predict the ratings using random method
         for row in test_data:
             # If the specified movie_id-user_id pair doesn't exist in the training data,
@@ -85,16 +86,18 @@ class RandomRecommender(BaseRecommender):
             # Collect the predicted & true ratings
             predict_ratings.append(predict_rating)
 
+        # Derive a list of dict of a list of movie_id being recommended to the user
         unique_user_ids_test = sorted(set([row.user_id for row in self.train_data]))
+        pred_user2items = defaultdict(list)
 
-        for user_id in self.unique_user_ids:
+        for user_id in unique_user_ids_test:
             # Collect the movie id rated by each user
             all_movie_id_rating = self._predict_rating(user_id)
 
             # Collect the recommended movie_ids of specific user
             movie_indexes_sorted = np.argsort(-all_movie_id_rating)
             for movie_index in movie_indexes_sorted:
-                movie_id = index_to_movie_id[movie_index]
+                movie_id = self.indices_movie_id[movie_index]
                 if movie_id not in pred_user2items[user_id]:
                     pred_user2items[user_id].append(movie_id)
                 if len(pred_user2items[user_id]) == 10:
