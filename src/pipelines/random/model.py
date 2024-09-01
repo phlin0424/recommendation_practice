@@ -34,7 +34,7 @@ class RandomRecommender(BaseRecommender):
 
         # Create a user_id to dict and a movie_id to ind  for the predictor to refer to:
         self.user_id_indices, _ = indices_mapper(
-            input_data=self.train_data, id_col_name="user_id", reverse=True
+            input_data=self.train_data, id_col_name="user_id", reverse=False
         )
         self.movie_id_indices, self.indices_movie_id = indices_mapper(
             input_data=self.train_data, id_col_name="movie_id", reverse=True
