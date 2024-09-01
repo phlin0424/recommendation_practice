@@ -8,6 +8,8 @@ from surprise import KNNWithMeans, Reader
 from utils.evaluation_metrics import Metrics
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
+from utils.helper import indices_mapper
+
 
 logger = configure_logging()
 
@@ -180,13 +182,12 @@ class UMCFRecommender(BaseRecommender):
         self.unique_movie_ids = sorted(set([row.movie_id for row in self.train_data]))
 
     def _get_indices(self):
-        # Create index-user-id to located the rating in the matrix
-        self.user_id_indices = dict(
-            zip(self.unique_user_ids, range(len(self.unique_user_ids)))
+        # Create a user_id to dict and a movie_id to ind  for the predictor to refer to:
+        self.user_id_indices, _ = indices_mapper(
+            input_data=self.train_data, id_col_name="user_id", reverse=False
         )
-        # Create index-movie-id to located the rating in the matrix
-        self.movie_id_indices = dict(
-            zip(self.unique_movie_ids, range(len(self.unique_movie_ids)))
+        self.movie_id_indices, _ = indices_mapper(
+            input_data=self.train_data, id_col_name="movie_id", reverse=False
         )
 
     def train(self):
@@ -285,7 +286,7 @@ class UMCFRecommender(BaseRecommender):
             self._pred_user2items = defaultdict(list)
 
     def _predict_non_naive(self):
-        pass
+        raise RuntimeError("Non-naive prediction is not supported currently.")
 
     def predict(self, naive=False):
         if naive:
@@ -338,7 +339,7 @@ if __name__ == "__main__":
     # print(input_data.ave_ratings[0:10])
     recommender = UMCFRecommender(input_data)
     recommender.train()
-    recommender.predict()
+    recommender.predict(naive=True)
     # breakpoint()
     metrics = recommender.evaluate()
 
