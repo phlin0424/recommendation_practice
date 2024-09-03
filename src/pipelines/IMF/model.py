@@ -6,6 +6,9 @@ from scipy.sparse import coo_matrix
 from utils.evaluation_metrics import Metrics
 from utils.helper import indices_mapper
 from utils.models import BaseRecommender
+from utils.pipeline_logging import configure_logging
+
+logger = configure_logging()
 
 
 class IMFRecommender(BaseRecommender):
@@ -14,8 +17,19 @@ class IMFRecommender(BaseRecommender):
 
     @staticmethod
     def _filter_data(
-        train_data: list[IntegratedData], minimum_num_rating=0
+        train_data: list[IntegratedData], minimum_num_rating=1
     ) -> list[IntegratedData]:
+        """filter the data by the following two criteria:
+            (1): Only select the movie id that have been rated more than once
+            (2): Only select the data with ratings higher than the threshold
+
+        Args:
+            train_data (list[IntegratedData]): _description_
+            minimum_num_rating (int, optional): _description_. Defaults to 1.
+
+        Returns:
+            list[IntegratedData]: _description_
+        """
         group_by_movies = defaultdict(list)
         for item in train_data:
             group_by_movies[item.movie_id].append(item)
@@ -28,13 +42,14 @@ class IMFRecommender(BaseRecommender):
         ]
 
         movielens_train_high_rating = [
-            item for items in filtered_data if items.rating >= minimum_num_rating
+            item for item in filtered_data if item.rating >= minimum_num_rating
         ]
+
         return movielens_train_high_rating
 
     def preprocess(
         self,
-        minimum_num_rating=0,
+        minimum_num_rating=1,
     ):
         # Filter the original data with the following two criteria:
         # (1) movies id with more than two rating data
@@ -52,13 +67,20 @@ class IMFRecommender(BaseRecommender):
 
     def _get_interaction_matrix(self):
         """create an interaction matrix"""
-        self._get_indices(self.filtered_train_data)
+        self._get_indices(input_data=self.filtered_train_data)
 
-        interaction = self._extract_col(self.filtered_train_data, "rating")
-        user_id = self._extract_col(self.filtered_train_data, "user_id")
-        movie_id = self._extract_col(self.filtered_train_data, "movie_id")
+        interaction_list = self._extract_col(self.filtered_train_data, "rating")
+        user_id_list = self._extract_col(self.filtered_train_data, "user_id")
+        movie_id_list = self._extract_col(self.filtered_train_data, "movie_id")
 
-        self.interaction_matrix = coo_matrix((interaction, user_id, movie_id))
+        user_index_list = [self.user_id_indices[user_id] for user_id in user_id_list]
+        movie_index_list = [
+            self.movie_id_indices[movie_id] for movie_id in movie_id_list
+        ]
+
+        self.interaction_matrix = coo_matrix(
+            (interaction_list, (user_index_list, movie_index_list))
+        )
 
     def _get_indices(self, input_data: list[IntegratedData]):
         # Create a user_id to dict and a movie_id to ind  for the predictor to refer to:
@@ -114,10 +136,16 @@ class IMFRecommender(BaseRecommender):
         # Predict the top 10 items for each user
         pred_user2items = defaultdict(list)
         # _pred_ratings: do not predict the ratings in this algorithm
-        pred_ratings = []
-        for row in self.test_data:
-            pred_user2items[row.user_id] = self._predict_single_user_top10(row.user_id)
-            pred_ratings.append(row.rating)  # Do not predict this value
+        pred_ratings = [row.rating for row in self.test_data]
+
+        test_user_ids = sorted(set([row.user_id for row in self.test_data]))
+
+        # for row in self.test_data:
+        for test_user_id in test_user_ids:
+            pred_user2items[test_user_id] = self._predict_single_user_top10(
+                test_user_id
+            )
+            # pred_ratings.append(0)  # Do not predict this value
 
         self._pred_user2items = pred_user2items
         self._pred_ratings = pred_ratings
@@ -130,3 +158,29 @@ class IMFRecommender(BaseRecommender):
             pred_user2items=self._pred_user2items,
         )
         return metrics
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    input_data = asyncio.run(IntegratedDatas.from_db(user_num=100))
+    # print(input_data.ave_ratings[0:10])
+    recommender = IMFRecommender(input_data)
+    recommender.preprocess()
+    recommender.train()
+    print(len(recommender.indices_movie_id))
+    # print(recommender.indices_movie_id.values())
+    recommender.predict()
+    # breakpoint()
+    metrics = recommender.evaluate()
+
+    # print(recommender.pred_user2items[8])
+
+    logger.info(
+        f"""
+        model: IMFRecommender
+        rmse: {metrics.rmse},
+        recall_at_k: {metrics.recall_at_k},
+        precision_at_k:{metrics.precision_at_k}
+        """
+    )
