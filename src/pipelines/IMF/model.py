@@ -8,8 +8,6 @@ from utils.helper import indices_mapper
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
 
-logger = configure_logging()
-
 
 class IMFRecommender(BaseRecommender):
     def __init__(self, input_data: IntegratedDatas):
@@ -17,11 +15,15 @@ class IMFRecommender(BaseRecommender):
 
     @staticmethod
     def _filter_data(
-        train_data: list[IntegratedData], minimum_num_rating=1
+        train_data: list[IntegratedData],
+        minimum_rating=1,
+        minimum_num_rating=2,
     ) -> list[IntegratedData]:
         """filter the data by the following two criteria:
             (1): Only select the movie id that have been rated more than once
+                --> 一回でも映画を見たら、ユーザーは映画に対し興味を示している　とう暗黙のルール
             (2): Only select the data with ratings higher than the threshold
+                --> 映画へ対し、一点以上評価すると、ユーザーは映画に対し興味を示している　とう暗黙のルール
 
         Args:
             train_data (list[IntegratedData]): _description_
@@ -37,25 +39,28 @@ class IMFRecommender(BaseRecommender):
         filtered_data = [
             item
             for items in group_by_movies.values()
-            if len(items) >= 2
+            if len(items) >= minimum_num_rating
             for item in items
         ]
 
         movielens_train_high_rating = [
-            item for item in filtered_data if item.rating >= minimum_num_rating
+            item for item in filtered_data if item.rating >= minimum_rating
         ]
 
         return movielens_train_high_rating
 
     def preprocess(
         self,
-        minimum_num_rating=1,
+        minimum_rating=1,
+        minimum_num_rating=2,
     ):
         # Filter the original data with the following two criteria:
         # (1) movies id with more than two rating data
         # (2) only select the data with rating > minimum_num_rating
         filtered_train_data = self._filter_data(
-            self.train_data, minimum_num_rating=minimum_num_rating
+            self.train_data,
+            minimum_num_rating=minimum_num_rating,
+            minimum_rating=minimum_rating,
         )
         self.filtered_train_data = filtered_train_data
 
@@ -65,11 +70,15 @@ class IMFRecommender(BaseRecommender):
     ) -> list[int | float]:
         return [item.get(col_name) for item in input_data]
 
-    def _get_interaction_matrix(self):
+    def _get_confidence_matrix(self, alpha=1.0):
         """create an interaction matrix"""
         self._get_indices(input_data=self.filtered_train_data)
 
         interaction_list = self._extract_col(self.filtered_train_data, "rating")
+        # Apply the transformation C_ui = 1 + alpha * r_ui
+        # 評価点数を基づいて信頼度を計算
+        confidence_list = [item * alpha + 1 for item in interaction_list]
+
         user_id_list = self._extract_col(self.filtered_train_data, "user_id")
         movie_id_list = self._extract_col(self.filtered_train_data, "movie_id")
 
@@ -78,8 +87,8 @@ class IMFRecommender(BaseRecommender):
             self.movie_id_indices[movie_id] for movie_id in movie_id_list
         ]
 
-        self.interaction_matrix = coo_matrix(
-            (interaction_list, (user_index_list, movie_index_list))
+        self.confidence_matrix = coo_matrix(
+            (confidence_list, (user_index_list, movie_index_list))
         )
 
     def _get_indices(self, input_data: list[IntegratedData]):
@@ -99,10 +108,10 @@ class IMFRecommender(BaseRecommender):
 
     def train(self, factors=10, n_epochs=50, alpha=1.0):
         # Prepare the interaction matrix
-        self._get_interaction_matrix()
+        self._get_confidence_matrix(alpha=alpha)
 
-        # Convert the matrix to CSR format
-        ratings_csr = self.interaction_matrix.tocsr()
+        # Convert the confidence matrix to CSR format
+        ratings_csr = self.confidence_matrix.tocsr()
 
         # Initialize the ALS model
         als_model = implicit.als.AlternatingLeastSquares(
@@ -162,6 +171,8 @@ class IMFRecommender(BaseRecommender):
 
 if __name__ == "__main__":
     import asyncio
+
+    logger = configure_logging()
 
     input_data = asyncio.run(IntegratedDatas.from_db(user_num=100))
     # print(input_data.ave_ratings[0:10])
