@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+ # use `docker-compose --profile pipeline_imf up` to start the pipeline.
+  pipeline_imf:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/IMF/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=IMF
+    profiles:
+      - pipeline_imf
+
  # use `docker-compose --profile pipeline_mf up` to start the pipeline.
   pipeline_mf:
     build:
