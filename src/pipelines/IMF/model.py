@@ -54,9 +54,12 @@ class IMFRecommender(BaseRecommender):
         minimum_rating=1,
         minimum_num_rating=2,
     ):
-        # Filter the original data with the following two criteria:
-        # (1) movies id with more than two rating data
-        # (2) only select the data with rating > minimum_num_rating
+        """暗黙の評価値を出すためとある閾値以下の評価値を０にする
+
+        Args:
+            minimum_rating (int, optional): 興味があると判定する評価点数の閾値. Defaults to 1.
+            minimum_num_rating (int, optional): 興味があると判定する映画あたり評価件数の閾値. Defaults to 2.
+        """
         filtered_train_data = self._filter_data(
             self.train_data,
             minimum_num_rating=minimum_num_rating,
@@ -107,6 +110,13 @@ class IMFRecommender(BaseRecommender):
         self.unique_movie_ids = sorted(set([row.movie_id for row in input_data]))
 
     def train(self, factors=10, n_epochs=50, alpha=1.0):
+        """信頼度を計算し、学習を行う
+
+        Args:
+            factors (int, optional): factors. モデルのパラメーター。Defaults to 10.
+            n_epochs (int, optional): epochs数. モデルのパラメーター。Defaults to 50.
+            alpha (float, optional): 信頼度を計算する際に使用する重み. Defaults to 1.0.
+        """
         # Prepare the interaction matrix
         self._get_confidence_matrix(alpha=alpha)
 
