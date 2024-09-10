@@ -100,6 +100,12 @@ class IntegratedData(BaseData):
     genres: list[str]
 
 
+class IntegratedTagsData(BaseData):
+    movie_year: int
+    genres: list[str]
+    tags: list[str]
+
+
 class PopularityAveRating(BaseModel):
     movie_id: int
     title: str
@@ -127,6 +133,35 @@ class IntegratedDatas(AbstractDatas):
                 movie_title=row.movie_title,
                 movie_year=row.movie_year,
                 genres=row.genres.split("|"),
+                timestamp=row.timestamp,
+                label=row.label,
+            )
+            for row in integrated_datas
+        ]
+        return cls(data=read_data)
+
+
+class IntegratedTagsDatas(AbstractDatas):
+    """Data model for random recommender model, with tags"""
+
+    data: list[IntegratedTagsData]
+
+    @classmethod
+    async def from_db(cls, user_num=1000) -> "IntegratedTagsDatas":
+        with open(settings.sql_dir / "integrated_tables_tags.sql", "r") as f:
+            sql_query = f.read()
+
+        args = {"user_num": user_num}
+        integrated_datas = await get_tables(sql_query=sql_query, args=args)
+        read_data = [
+            IntegratedTagsData(
+                user_id=row.user_id,
+                movie_id=row.movie_id,
+                rating=row.rating,
+                movie_title=row.movie_title,
+                movie_year=row.movie_year,
+                genres=row.genres.split("|"),
+                tags=row.tag.split("|"),
                 timestamp=row.timestamp,
                 label=row.label,
             )
@@ -216,15 +251,24 @@ if __name__ == "__main__":
     #     print("length of test data: ", len(test_data))
     #     print("length of train data: ", len(train_data))
 
+    # async def _main():
+    #     movies = await PopularityDatas.from_db(user_num=1000, threshold=30)
+    #     train_data, test_data = movies.split_data()
+    #     print(test_data[0])
+    #     print(test_data[1])
+    #     # print("length of all data: ", len(movies.data))
+    #     print("length of test data: ", len(test_data))
+    #     print("length of train data: ", len(train_data))
+    #     print("length of ave ratings: ", len(movies.ave_ratings))
+
     async def _main():
-        movies = await PopularityDatas.from_db(user_num=1000, threshold=30)
+        movies = await IntegratedTagsDatas.from_db(user_num=100)
         train_data, test_data = movies.split_data()
         print(test_data[0])
         print(test_data[1])
         # print("length of all data: ", len(movies.data))
         print("length of test data: ", len(test_data))
         print("length of train data: ", len(train_data))
-        print("length of ave ratings: ", len(movies.ave_ratings))
 
     print("loading movie lense data")
     start_time = time.time()
