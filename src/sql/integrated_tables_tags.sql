@@ -68,13 +68,13 @@ ON
 all_data AS (
 SELECT 
     user_id, 
-    tags.movie_id, 
+    all_data0.movie_id, 
     rating, 
     movie_title, 
     movie_year,
     genres, 
     timestamp,
-    concatenated_tags as tag
+    COALESCE(concatenated_tags, '') AS tag  -- Replace NULL with an empty string
 FROM 
     all_data0
 LEFT JOIN
