@@ -100,7 +100,9 @@ class IntegratedData(BaseData):
     genres: list[str]
 
 
-class IntegratedTagsData(BaseData):
+class IntegratedTagsData(BaseModel):
+    movie_id: int
+    movie_title: str
     movie_year: int
     genres: list[str]
     tags: list[str]
@@ -141,29 +143,35 @@ class IntegratedDatas(AbstractDatas):
         return cls(data=read_data)
 
 
-class IntegratedTagsDatas(AbstractDatas):
-    """Data model for random recommender model, with tags"""
+class IntegratedTagsDatas(BaseModel):
+    """Data model for random recommender model, with tags
+
+    The data is fetched via:
+        SELECT
+            movie_id,
+            movie_title,
+            movie_year,
+            genres,
+            tags
+        FROM
+            all_data
+    """
 
     data: list[IntegratedTagsData]
 
     @classmethod
-    async def from_db(cls, user_num=1000) -> "IntegratedTagsDatas":
+    async def from_db(cls) -> "IntegratedTagsDatas":
         with open(settings.sql_dir / "integrated_tables_tags.sql", "r") as f:
             sql_query = f.read()
 
-        args = {"user_num": user_num}
-        integrated_datas = await get_tables(sql_query=sql_query, args=args)
+        integrated_datas = await get_tables(sql_query=sql_query)
         read_data = [
             IntegratedTagsData(
-                user_id=row.user_id,
                 movie_id=row.movie_id,
-                rating=row.rating,
                 movie_title=row.movie_title,
                 movie_year=row.movie_year,
                 genres=row.genres.split("|"),
-                tags=row.tag.split("|"),
-                timestamp=row.timestamp,
-                label=row.label,
+                tags=row.tags.split("|"),
             )
             for row in integrated_datas
         ]
@@ -262,13 +270,13 @@ if __name__ == "__main__":
     #     print("length of ave ratings: ", len(movies.ave_ratings))
 
     async def _main():
-        movies = await IntegratedTagsDatas.from_db(user_num=100)
-        train_data, test_data = movies.split_data()
-        print(test_data[0])
-        print(test_data[1])
+        movies = await IntegratedTagsDatas.from_db()
+        movie_contents = movies.data
+        print(movie_contents[0])
+        print(movie_contents[1])
         # print("length of all data: ", len(movies.data))
-        print("length of test data: ", len(test_data))
-        print("length of train data: ", len(train_data))
+        print("length of test data: ", len(movie_contents))
+        print("length of train data: ", len(movie_contents))
 
     print("loading movie lense data")
     start_time = time.time()
