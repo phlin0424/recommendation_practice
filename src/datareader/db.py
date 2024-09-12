@@ -46,7 +46,7 @@ async def fetch_datas(table_model):
 
 
 # Async function to run the sql to fetch the data from the database
-async def get_tables(sql_query: str, args: dict[int, any]):
+async def get_tables(sql_query: str, args: dict[int, any] = None):
     """Async function to query data from DB based on SQL query
 
     Args:
@@ -57,7 +57,11 @@ async def get_tables(sql_query: str, args: dict[int, any]):
         _type_: _description_
     """
     async with AsyncSessionLocal() as session:
-        result = await session.execute(text(sql_query), args)
+        if args:
+            result = await session.execute(text(sql_query), args)
+        else:
+            result = await session.execute(text(sql_query))
+
         return result.fetchall()
 
 
