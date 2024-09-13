@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+ # use `docker-compose --profile pipeline_lda_contents up` to start the pipeline.
+  pipeline_lda_contents:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/LDA_contents/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=LDA_CONTENTS
+    profiles:
+      - pipeline_lda_contents
+
+
  # use `docker-compose --profile pipeline_imf up` to start the pipeline.
   pipeline_imf:
     build:
