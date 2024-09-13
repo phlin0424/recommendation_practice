@@ -40,3 +40,5 @@ SELECT
     tags
 FROM 
     all_data
+ORDER BY 
+    movie_id
