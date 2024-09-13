@@ -82,13 +82,6 @@ class LDAContentsRecommender(BaseRecommender):
         self.movie_topics = movie_topics
         self.movie_topic_scores = movie_topic_scores
 
-    def _get_indices(self, input_data: list[IntegratedTagsData]):
-        # Create a user_id to dict and a movie_id to ind  for the predictor to refer to:
-        movie_id_indices, _ = indices_mapper(
-            input_data=input_data, id_col_name="movie_id", reverse=True
-        )
-        return movie_id_indices
-
     def _get_watched_list(self) -> dict[int, list[int]]:
         # Find the most recently watched movie for each user
         grouped_watched_list = defaultdict(list)
@@ -104,7 +97,12 @@ class LDAContentsRecommender(BaseRecommender):
         grouped_watched_list = self._get_watched_list()
 
         # Get the movie_id - index pair
-        movie_id_indices = self._get_indices(self.movie_contents)
+        movie_id_indices = dict(
+            zip(
+                [row.movie_id for row in self.movie_contents],
+                range(len(self.movie_contents)),
+            )
+        )
 
         # Initialize a dictionary to store predictions
         pred_user2items = defaultdict(list)
@@ -115,13 +113,12 @@ class LDAContentsRecommender(BaseRecommender):
         # Looping over all the users to recommend the movies based on topics
         for user_id in unique_user_ids:
             # Sort the watching list of each user to get the most recently watched movie
+            # Derive the last 10 movies each user has watched:
             movies_watched = grouped_watched_list[user_id]
             sorted_movies = sorted(movies_watched, key=lambda x: x[1], reverse=True)
             recently_watched_movie_ids = [
                 movie_id for movie_id, timestamp in sorted_movies
             ]
-
-            # Derive the last 10 movies each user has watched:
             movie_ids = recently_watched_movie_ids[-10:]
 
             # Get the most frequent topic from the recently watched movies:
@@ -141,7 +138,7 @@ class LDAContentsRecommender(BaseRecommender):
             )
 
             # Recommend movies to the user according to the topic score
-            for movie_id in recommend_candidates:
+            for movie_id, topic_score in recommend_candidates:
                 if movie_id not in movies_watched:
                     pred_user2items[user_id].append(movie_id)
                 if len(pred_user2items[user_id]) == 10:
@@ -166,7 +163,7 @@ if __name__ == "__main__":
     logger = configure_logging()
 
     # Load the necessary data
-    input_data = asyncio.run(IntegratedTagsDatas.from_db(user_num=100))
+    input_data = asyncio.run(IntegratedTagsDatas.from_db(user_num=1000))
 
     # print(input_data.ave_ratings[0:10])
     recommender = LDAContentsRecommender(input_data)
