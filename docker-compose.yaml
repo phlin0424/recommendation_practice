@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+ # use `docker-compose --profile pipeline_bpr up` to start the pipeline.
+  pipeline_bpr:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/BPR/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=BPR
+    profiles:
+      - pipeline_bpr
+
  # use `docker-compose --profile pipeline_lda_contents up` to start the pipeline.
   pipeline_lda_contents:
     build:
