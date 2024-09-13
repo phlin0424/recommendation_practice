@@ -1,15 +1,14 @@
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 
 import gensim
 from datareader.ml_10m_data import (
     IntegratedTagsData,
     IntegratedTagsDatas,
 )
+from gensim.corpora.dictionary import Dictionary
 from utils.evaluation_metrics import Metrics
-from utils.helper import indices_mapper
 from utils.models import BaseRecommender
 from utils.pipeline_logging import configure_logging
-from gensim.corpora.dictionary import Dictionary
 
 
 class LDAContentsRecommender(BaseRecommender):
