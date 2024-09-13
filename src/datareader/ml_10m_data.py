@@ -107,6 +107,9 @@ class IntegratedTagsData(BaseModel):
     genres: list[str]
     tags: list[str]
 
+    def get(self, key):
+        return getattr(self, key, None)
+
 
 class PopularityAveRating(BaseModel):
     movie_id: int
@@ -143,7 +146,7 @@ class IntegratedDatas(AbstractDatas):
         return cls(data=read_data)
 
 
-class IntegratedTagsDatas(BaseModel):
+class IntegratedTagsDatas(AbstractDatas):
     """Data model for random recommender model, with tags
 
     The data is fetched via:
@@ -157,15 +160,37 @@ class IntegratedTagsDatas(BaseModel):
             all_data
     """
 
-    data: list[IntegratedTagsData]
+    movie_contents: list[IntegratedTagsData]
+    data: list[IntegratedData]
 
     @classmethod
-    async def from_db(cls) -> "IntegratedTagsDatas":
-        with open(settings.sql_dir / "integrated_tables_tags.sql", "r") as f:
+    async def from_db(cls, user_num=1000) -> "IntegratedTagsDatas":
+        # Read the train data
+        with open(settings.sql_dir / "integrated_tables.sql", "r") as f:
             sql_query = f.read()
 
-        integrated_datas = await get_tables(sql_query=sql_query)
+        # Read the tag& genres data
+        args = {"user_num": user_num}
+        integrated_datas = await get_tables(sql_query=sql_query, args=args)
         read_data = [
+            IntegratedData(
+                user_id=row.user_id,
+                movie_id=row.movie_id,
+                rating=row.rating,
+                movie_title=row.movie_title,
+                movie_year=row.movie_year,
+                genres=row.genres.split("|"),
+                timestamp=row.timestamp,
+                label=row.label,
+            )
+            for row in integrated_datas
+        ]
+
+        # Read the tag& genres data
+        with open(settings.sql_dir / "integrated_tables_tags.sql", "r") as f:
+            sql_query = f.read()
+        movie_contents = await get_tables(sql_query=sql_query)
+        read_data_tag = [
             IntegratedTagsData(
                 movie_id=row.movie_id,
                 movie_title=row.movie_title,
@@ -173,9 +198,9 @@ class IntegratedTagsDatas(BaseModel):
                 genres=row.genres.split("|"),
                 tags=row.tags.split("|"),
             )
-            for row in integrated_datas
+            for row in movie_contents
         ]
-        return cls(data=read_data)
+        return cls(data=read_data, movie_contents=read_data_tag)
 
 
 class PopularityDatas(AbstractDatas):
@@ -270,10 +295,11 @@ if __name__ == "__main__":
     #     print("length of ave ratings: ", len(movies.ave_ratings))
 
     async def _main():
-        movies = await IntegratedTagsDatas.from_db()
-        movie_contents = movies.data
+        movies = await IntegratedTagsDatas.from_db(user_num=1000)
+        input_data = movies.data
+        movie_contents = movies.movie_contents
         print(movie_contents[0])
-        print(movie_contents[1])
+        print(input_data[0])
         # print("length of all data: ", len(movies.data))
         print("length of test data: ", len(movie_contents))
         print("length of train data: ", len(movie_contents))
