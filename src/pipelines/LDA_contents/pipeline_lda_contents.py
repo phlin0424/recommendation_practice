@@ -1,13 +1,12 @@
 import asyncio
 
+import mlflow
 from core.config import settings
 from datareader.ml_10m_data import IntegratedTagsDatas
 from pipelines.LDA_contents.model import LDAContentsRecommender
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
-
-import mlflow
 
 logger = configure_logging()
 
