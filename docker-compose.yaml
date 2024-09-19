@@ -1,7 +1,22 @@
 version: '3.8'
 
 services:
- # use `docker-compose --profile pipeline_bpr up` to start the pipeline.
+  # use `docker-compose --profile pipeline_lda_collaboration up` to start the pipeline.
+  pipeline_lda_collaboration:
+    build:
+      context: .
+      dockerfile: ./src/pipelines/LDA_collaboration/Dockerfile
+    volumes:
+      - ./mlflow/artifacts:/app/mlflow/artifacts
+      - ./mlflow:/app/mlflow/
+    env_file:
+      - .env
+    environment:
+      - PIPELINE_NAME=LDA_COLLABORATION
+    profiles:
+      - pipeline_lda_collaboration
+
+  # use `docker-compose --profile pipeline_bpr up` to start the pipeline.
   pipeline_bpr:
     build:
       context: .
