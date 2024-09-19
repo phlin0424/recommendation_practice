@@ -15,17 +15,17 @@ RUN pip install --upgrade pip && \
     pip install poetry
 
 # Copy the poetry file to run the pipeline
-COPY src/pipelines/SVD/pyproject.toml /app/pyproject.toml
+COPY src/pipelines/NMF/pyproject.toml /app/pyproject.toml
 
 # Copy the module codes
 COPY src /app/src
 
 # Copy the pipeline script
-COPY src/pipelines/SVD/pipeline_svd.py /app/src/pipeline_svd.py
+COPY src/pipelines/NMF/pipeline_nmf.py /app/src/pipeline_nmf.py
 
 # Install the dependencies usnig poetry
 RUN poetry config virtualenvs.in-project true
 RUN poetry install --only main
 
 # Use entrypoint script to run the appropriate pipeline
-ENTRYPOINT [ "poetry", "run", "python", "src/pipeline_svd.py"]
+ENTRYPOINT [ "poetry", "run", "python", "src/pipeline_nmf.py"]

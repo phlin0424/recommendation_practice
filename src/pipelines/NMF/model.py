@@ -43,7 +43,7 @@ class NMFRecommender(BaseRecommender):
 
         self.train_rating_matrix = train_rating_matrix
 
-    def train(self, factor=5, fill_with_zero=False):
+    def train(self, fill_with_zero=False):
         logger.info("NMFRecommender: Training")
 
         self._get_unique_ids()
