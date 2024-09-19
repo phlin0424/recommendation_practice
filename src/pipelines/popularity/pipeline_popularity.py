@@ -69,6 +69,8 @@ def run_pipeline(pipeline_settings: PipelineSettings):
         experiment_id=settings.experiment_id,
         run_name=pipeline_settings.model_name,
     ) as run:
+        mlflow.log_params(pipeline_settings.model_dump())
+
         # ++++++++++++++++++++++++++
         # Preprocess
         # ++++++++++++++++++++++++++
