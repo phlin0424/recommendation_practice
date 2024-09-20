@@ -2,12 +2,11 @@ import asyncio
 
 import mlflow
 from core.config import settings
-
 from datareader.ml_10m_data import PopularityDatas
 from pipelines.popularity.model import PopularityRecommender
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = configure_logging()
 

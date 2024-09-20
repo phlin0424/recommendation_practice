@@ -4,9 +4,9 @@ import mlflow
 from core.config import settings
 from datareader.ml_10m_data import IntegratedDatas
 from pipelines.SVD.model import SVDRecommender
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = configure_logging()
 
