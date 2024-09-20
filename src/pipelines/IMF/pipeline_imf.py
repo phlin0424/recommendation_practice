@@ -19,6 +19,7 @@ class PipelineSettings(BaseSettings):
     minimum_num_rating: int = 1
     minimum_rating: int = 2
     alpha: float = 1.0
+    model_name: str = "IMF"
 
     model_config = SettingsConfigDict(
         env_file="pipeline_params.env",
@@ -75,7 +76,9 @@ def run_pipeline(pipeline_settings: PipelineSettings):
     logger.info(f"experiment id: {settings.experiment_id}")
     logger.info(f"experiment name: {settings.experiment_name}")
 
-    with mlflow.start_run(experiment_id=settings.experiment_id, run_name="IMF") as run:
+    with mlflow.start_run(
+        experiment_id=settings.experiment_id, run_name=pipeline_settings.model_name
+    ) as run:
         # Log all the pipeline parameters
         mlflow.log_params(pipeline_settings.model_dump())
 
