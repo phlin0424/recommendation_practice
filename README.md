@@ -38,11 +38,39 @@ This repository contains:
 ## Project Structure
 
 
-### Folder Structure
 
 
 
 The main code is under the `src/` directory, which contains the following modules:
+
+```
+. 
+├── tests/ # Test code (tbc)
+├── src/ 
+│ ├── core/ 
+│ ├── datareader/ 
+│ ├── pipelines/ 
+│ │ └──{model_name}/
+│ │ │ ├── Dockerfile
+│ │ │ ├── model.py
+│ │ │ ├── pipeline_{model_name}.py
+│ │ │ ├── pyproject.toml
+│ │ │ └── pipeline_params.env
+│ ├── sql/ 
+│ ├── table_models/ 
+│ └── utils/ 
+├── docker-compose.yml 
+├── README.md 
+├── poetry.lock
+├── DockerfileMlflow
+├── alembic.ini
+├── .env
+└── pyproject.toml
+```
+
+The description of each file is as below: 
+
+
 - `core/`: Loads environment variables using Pydantic settings.
 - `datareader/`: Contains modules to read data from the database.
 - `pipelines/`: Contains pipelines and models for different machine learning experiments. Each pipeline consists of the following components:
@@ -57,12 +85,8 @@ The main code is under the `src/` directory, which contains the following module
 - `sql/`: Stores SQL queries used for data extraction and transformation.
 - `table_models/`: Defines database models using SQLAlchemy. Also include the code to execute the migration. 
 - `utils/`: Contains various helper functions to support other modules.
-
-
-### Additional Files 
-
 - `alembic/`: Code to execute migrations. 
-- `DockerfileMlflow`: Defines the instructions to build Docker images for running the pipelines, MLflow, and other services. This file describes the environment setup, including the installation of dependencies.
+- `DockerfileMlflow`: Defines the instructions to build Docker images MLflow. 
 - `docker-compose.yml`: Orchestrates multiple Docker containers (MLflow, PostgreSQL, FTP, and pipelines) to run the entire system seamlessly.
 - `poetry.lock` / `pyproject.toml`: Lists the Python dependencies needed for the project.
 - `alembic.ini`: Handles the database migrations for loading the MovieLens dataset into PostgreSQL.
@@ -125,14 +149,15 @@ This project features several recommendation models that serve as the core of th
 
 
 ### Metrics
+To evaluate the performance of the pipelines, we use the following general-purpose metrics:
 
-The performance of the pipelines is evaluated using the following metrics:
+|Metric|Description|Meaning|
+|:-|:-|:-|
+|RMSE (Root Mean Squared Error)|Measures the difference between the predicted and actual rating values.|A lower RMSE indicates better model performance.|
+|Recall@k|Evaluates how many of the top `k` recommended movies match the true top `k` movies for each user.|Higher Recall@k value indicates higher ability to retrieve relevant items.|
+|Precision@k|Measures the proportion of the top `k` recommended movies that are relevant, compared to the true top `k` movies.|Higher Precision@k value indicates higher ability to retrieve relevant items.|
 
-|Metric|Description|
-|:-|:-|
-|RMSE (Root Mean Squared Error)|Measures the difference between the predicted and actual rating values.|
-|Recall@k|Evaluates how many of the top `k` recommended movies match the true top `k` movies for each user.|
-|Precision@k|Measures the proportion of the top `k` recommended movies that are relevant, compared to the true top `k` movies.|
+**Note:** Some pipelines may not use all of these metrics due to the specific characteristics of the algorithms employed.
 
 
 
@@ -191,3 +216,17 @@ Make sure you have the following installed:
     # Run the SVD recommender pipeline for example: 
     docker-compose --profile pipeline_svd up
     ```
+
+### Expected Results
+
+By following the provided steps, a new run will be created in MLflow. You can view the logged metrics, pipeline parameters, and the trained model (saved as a `.pkl` file), which is stored as an artifact on the FTP server and tracked in MLflow.
+
+
+
+![ExampleResult](resources/sample_result.gif)
+
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
