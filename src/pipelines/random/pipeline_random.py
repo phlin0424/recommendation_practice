@@ -1,12 +1,13 @@
 import asyncio
 
 import mlflow
-from core.config import settings
+from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedDatas
 from pipelines.random.model import RandomRecommender
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
+import joblib
 
 logger = configure_logging()
 
@@ -51,11 +52,6 @@ def run_pipeline(pipeline_settings: PipelineSettings):
     tracking_uri = settings.tracking_uri
     mlflow.set_tracking_uri(tracking_uri)
 
-    # # Setting of the pipeline
-    # model_name = "RandomRecommender_model"
-    # model_output_fname = f"{model_name}.pkl"
-    # model_filename = DIR_PATH / f"mlflow/artifacts/{model_output_fname}"
-
     # Logging the experiment details
     logger.info(f"MLflow tracking uri: {settings.tracking_uri}")
     logger.info(f"artifact root: {settings.artifact_location}")
@@ -79,9 +75,12 @@ def run_pipeline(pipeline_settings: PipelineSettings):
         # Train
         # ++++++++++++++++++++++++++
         algo = train_model(algo)
-        # joblib.dump(algo, model_filename)
-        # mlflow.log_artifact(model_filename, artifact_path="models")
-        logger.info(f"Model saved to {pipeline_settings.model_name}")
+        # Setting of artifact (trained model)
+        model_name = pipeline_settings.model_name
+        model_output_fname = f"{model_name}.pkl"
+        model_filename = DIR_PATH / f"mlflow/artifacts/{model_output_fname}"
+        joblib.dump(algo, model_filename)
+        mlflow.log_artifact(model_filename, artifact_path="models")
 
         # ++++++++++++++++++++++++++
         # Predict & Evaluate

@@ -1,12 +1,13 @@
 import asyncio
 
 import mlflow
-from core.config import settings
+from core.config import DIR_PATH, settings
 from datareader.ml_10m_data import IntegratedTagsDatas
 from pipelines.LDA_contents.model import LDAContentsRecommender
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from utils.evaluation_metrics import Metrics
 from utils.pipeline_logging import configure_logging
+import joblib
 
 logger = configure_logging()
 
@@ -90,8 +91,12 @@ def run_pipeline(pipeline_settings: PipelineSettings):
         # Train
         # ++++++++++++++++++++++++++
         algo = train_model(algo, pipeline_settings)
-        # joblib.dump(algo, model_filename)
-        # mlflow.log_artifact(model_filename, artifact_path="models")
+        # Setting of artifact (trained model)
+        model_name = pipeline_settings.model_name
+        model_output_fname = f"{model_name}.pkl"
+        model_filename = DIR_PATH / f"mlflow/artifacts/{model_output_fname}"
+        joblib.dump(algo, model_filename)
+        mlflow.log_artifact(model_filename, artifact_path="models")
         # logger.info(f"Model saved to {model_filename}")
 
         # ++++++++++++++++++++++++++
