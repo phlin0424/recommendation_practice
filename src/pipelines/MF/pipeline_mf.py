@@ -20,6 +20,7 @@ class PipelineSettings(BaseSettings):
     n_epochs: int = 50
     minimum_num_rating: int = 100
     use_bias: bool = False
+    model_name: str = "MF"
 
     model_config = SettingsConfigDict(
         env_file="pipeline_params.env",
