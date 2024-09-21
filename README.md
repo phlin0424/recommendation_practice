@@ -1,5 +1,6 @@
 # MLflow-Based Machine Learning Experimentation for Recommendation Systems
 
+![MLflowOverview](resources/project_overview.gif)
 
 This repository facilitates the experimentation and evaluation of machine learning models, primarily for recommendation systems using MLflow for tracking experiments. 
 
@@ -8,6 +9,12 @@ The project is structured around Docker containers, ensuring smooth orchestratio
 
 
 ## Key Features
+
+The diagram below shows the structure of this project:
+
+![ProjectStructure](resources/project_structure.png)
+
+
 
 This repository contains:
 
@@ -25,20 +32,24 @@ This repository contains:
 - **Docker Compose:** All containers (MLflow, FTP server, PostgreSQL, and pipeline execution) are orchestrated using Docker Compose for simplified management.
 
 
+- **Backend with SQLite:** Utilizes an SQLite database mounted to a local volume as the backend for the MLflow tracking server. 
+
+
 ## Project Structure
 
 
 ### Folder Structure
 
+
+
 The main code is under the `src/` directory, which contains the following modules:
-- `alembic/`: Code to execute migrations. 
 - `core/`: Loads environment variables using Pydantic settings.
 - `datareader/`: Contains modules to read data from the database.
 - `pipelines/`: Contains pipelines and models for different machine learning experiments. Each pipeline consists of the following components:
     
     - `Dockerfile`: Used to launch the container for the pipeline.
     - `model.py`: Contains the code for the machine learning model.
-    - `pipeline_{model_name}.py`: Contains the code for the specific pipeline corresponding to the model.
+    - `pipeline_{model_name}.py`: Contains the code for the specific pipeline corresponding to the model. Use MLflow modules to record the parameters being used and the evaluation results (i.e., the metrics). 
     - `pyproject.toml`: Defines the environment and dependencies for the container.
     - `pipeline_params.env`: Stores the environment variables used in the pipeline.
 
@@ -50,11 +61,79 @@ The main code is under the `src/` directory, which contains the following module
 
 ### Additional Files 
 
-- `Dockerfile`: Defines the instructions to build Docker images for running the pipelines, MLflow, and other services. This file describes the environment setup, including the installation of dependencies.
+- `alembic/`: Code to execute migrations. 
+- `DockerfileMlflow`: Defines the instructions to build Docker images for running the pipelines, MLflow, and other services. This file describes the environment setup, including the installation of dependencies.
 - `docker-compose.yml`: Orchestrates multiple Docker containers (MLflow, PostgreSQL, FTP, and pipelines) to run the entire system seamlessly.
 - `poetry.lock` / `pyproject.toml`: Lists the Python dependencies needed for the project.
 - `alembic.ini`: Handles the database migrations for loading the MovieLens dataset into PostgreSQL.
 - `.env`: Stores environment variables such as database credentials and configuration settings.
+
+
+## Data and Models Overview
+
+### Dataset Split
+
+The dataset is split based on time. The last 5 movies rated by each user are used as the test data.
+
+You can find the algorithm for splitting the data in the `sql/integrated_tables.sql` file. The part responsible for splitting is as below: 
+
+
+```sql
+-- split the data into test and training data
+ranked_data AS (
+    SELECT 
+        user_id, 
+        ...
+        timestamp, 
+        ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp desc) AS rank
+    FROM 
+        all_data
+), split_data AS (
+SELECT
+    ...
+    CASE
+        WHEN rank <= 5 THEN 'test'
+        ELSE 'train'
+    END AS label
+FROM
+    ranked_data
+    ...
+)
+
+```
+
+
+### Recommender Models in this Project
+
+
+This project features several recommendation models that serve as the core of the machine learning pipeline. You can find the implementation of each model in the `model.py` file within each pipeline directory.
+
+
+|Model|Description|
+|:-|:-|
+|Random Recommendation|Recommends movies at random, without utilizing any user or movie information.|
+|Popularity Recommendation|Suggests movies that are widely popular across all users.|
+|Association Recommendation|Recommends movies that are frequently rated together by users.|
+|User-based Memory-based Collaborative Filtering (UMCF)| Recommends movies by identifying similarities between users' preferences.|
+|SVD (Singular Value Decomposition)|Uses latent factors derived from SVD to recommend movies based on user-item interactions.|
+|NMF (Non-Negative Matrix Factorization)|Similar to SVD, but restricts factors to non-negative values, making recommendations interpretable.|
+|MF (Matrix Factorization)|Optimizes user and movie vectors to find the best latent representations for recommendations.|
+|IMF (Implicit Matrix Factorization)|Recommends movies based on implicit feedback, using hidden factors from implicit interactions.|
+|BRP (Bayesian Personalized Ranking)|Assumes users prefer rated movies over unrated ones, optimizing for ranking quality.|
+|LDA (Content-Based Filtering)|Uses Latent Dirichlet Allocation to recommend movies based on content similarities.|
+|LDA (Collaborative Filtering)|Applies LDA to collaborative filtering, recommending movies based on patterns in user behavior.|
+
+
+### Metrics
+
+The performance of the pipelines is evaluated using the following metrics:
+
+|Metric|Description|
+|:-|:-|
+|RMSE (Root Mean Squared Error)|Measures the difference between the predicted and actual rating values.|
+|Recall@k|Evaluates how many of the top `k` recommended movies match the true top `k` movies for each user.|
+|Precision@k|Measures the proportion of the top `k` recommended movies that are relevant, compared to the true top `k` movies.|
+
 
 
 ## How to Run
@@ -62,42 +141,53 @@ The main code is under the `src/` directory, which contains the following module
 
 ### Prerequisites
 
-tbc
+Make sure you have the following installed:
+
+- `Python 3.11` or higher
+- `poetry` for dependency management
+- `Docker` and `Docker Compose` for container orchestration
+
 
 ### Steps to run the system
 
 1. Clone this repository:
 
-```shell 
-git clone <repository-url>
-```
+    ```shell 
+    git clone https://github.com/phlin0424/recommendation_practice
+    ```
 
-2. Start all necessary services (MLflow, PostgreSQL, FTP, etc.) using Docker Compose:
-```
-docker-compose up
-```
+2. Place the MovieLens dataset (`ml-10m`) under `./data`: 
 
-3. Execute migration: 
+    ```shell 
+    # Ensure that you have the following files under ./data/ml-10m
+    ls  ./data/ml-10m 
+    README.html      allbut.pl        movies.dat       ratings.dat      split_ratings.sh tags.dat
+    
+    ```
 
-```shell
-# Assume that you have installed poetry
-poetry install
 
-# Create the initial tables for the dataset
-alembic revision --autogenerate -m "Create initial tables"
+3. Start all necessary services (MLflow, PostgreSQL, FTP, etc.) using Docker Compose:
+    ```
+    docker-compose up
+    ```
 
-# Populate the dataset to DB
-poetry run python table_models/ml_10m/migrate_data.py
-```
+4. Execute the migration and populate the data to the database container: 
+
+    ```shell
+    # Install all the decencies using poetry: 
+    poetry install
+
+    # Create the initial tables for the dataset: 
+    alembic revision --autogenerate -m "Create initial tables"
+
+    # Populate the dataset to DB:
+    poetry run python table_models/ml_10m/migrate_data.py
+    ```
 
 
 4. To run a machine learning pipeline (train and evaluate a model), use:
 
-```shell
-# Run the SVD recommender pipeline for example: 
-docker-compose --profile pipeline_svd up
-```
-
-### Steps to Configure `.env`
-
-tbc
+    ```shell
+    # Run the SVD recommender pipeline for example: 
+    docker-compose --profile pipeline_svd up
+    ```
