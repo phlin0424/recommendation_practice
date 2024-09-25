@@ -133,19 +133,19 @@ FROM
 This project features several recommendation models that serve as the core of the machine learning pipeline. You can find the implementation of each model in the `model.py` file within each pipeline directory.
 
 
-|Model|Description|
-|:-|:-|
-|Random Recommendation|Recommends movies at random, without utilizing any user or movie information.|
-|Popularity Recommendation|Suggests movies that are widely popular across all users.|
-|Association Recommendation|Recommends movies that are frequently rated together by users.|
-|User-based Memory-based Collaborative Filtering (UMCF)| Recommends movies by identifying similarities between users' preferences.|
-|SVD (Singular Value Decomposition)|Uses latent factors derived from SVD to recommend movies based on user-item interactions.|
-|NMF (Non-Negative Matrix Factorization)|Similar to SVD, but restricts factors to non-negative values, making recommendations interpretable.|
-|MF (Matrix Factorization)|Optimizes user and movie vectors to find the best latent representations for recommendations.|
-|IMF (Implicit Matrix Factorization)|Recommends movies based on implicit feedback, using hidden factors from implicit interactions.|
-|BRP (Bayesian Personalized Ranking)|Assumes users prefer rated movies over unrated ones, optimizing for ranking quality.|
-|LDA (Content-Based Filtering)|Uses Latent Dirichlet Allocation to recommend movies based on content similarities.|
-|LDA (Collaborative Filtering)|Applies LDA to collaborative filtering, recommending movies based on patterns in user behavior.|
+|Model|Description|File Link|
+|:-|:-|:-|
+|Random Recommendation|Recommends movies at random, without utilizing any user or movie information.|[model.py](src/pipelines/random/model.py)|
+|Popularity Recommendation|Suggests movies that are widely popular across all users.|[model.py](src/pipelines/popularity/model.py)|
+|Association Recommendation|Recommends movies that are frequently rated together by users.|[model.py](src/pipelines/association/model.py)|
+|User-based Memory-based Collaborative Filtering (UMCF)| Recommends movies by identifying similarities between users' preferences.|[model.py](src/pipelines/UMCF/model.py)|
+|SVD (Singular Value Decomposition)|Uses latent factors derived from SVD to recommend movies based on user-item interactions.|[model.py](src/pipelines/SVD/model.py)|
+|NMF (Non-Negative Matrix Factorization)|Similar to SVD, but restricts factors to non-negative values, making recommendations interpretable.|[model.py](src/pipelines/NMF/model.py)|
+|MF (Matrix Factorization)|Optimizes user and movie vectors to find the best latent representations for recommendations.|[model.py](src/pipelines/MF/model.py)|
+|IMF (Implicit Matrix Factorization)|Recommends movies based on implicit feedback, using hidden factors from implicit interactions.|[model.py](src/pipelines/IMF/model.py)|
+|BRP (Bayesian Personalized Ranking)|Assumes users prefer rated movies over unrated ones, optimizing for ranking quality.|[model.py](src/pipelines/BPR/model.py)|
+|LDA (Content-Based Filtering)|Uses Latent Dirichlet Allocation to recommend movies based on content similarities.|[model.py](src/pipelines/LDA_contents/model.py)|
+|LDA (Collaborative Filtering)|Applies LDA to collaborative filtering, recommending movies based on patterns in user behavior.|[model.py](src/pipelines/LDA_collaboration/model.py)|
 
 
 ### Metrics
